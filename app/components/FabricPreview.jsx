@@ -13,23 +13,51 @@ import { MapContext } from "../MapContext";
 
 const FabricPreview = () => {
   const [currentModel, setCurrentModel] = useState(null);
-  const { connectedMaps } = useContext(MapContext);
+  const { connectedMaps, materialParams, updateMaterialParams } =
+    useContext(MapContext);
+
+  const ab = materialParams.metalness;
+  console.log(ab);
 
   const modelPath = "/FabricTexture.fbx";
 
-  // GUI controls for non-textural properties using Leva
-  const {
-    bumpScale,
-    displacementScale,
-    emissiveIntensity,
-    metalness,
-    roughness,
-  } = useControls({
-    bumpScale: { value: 0.3, min: 0, max: 1, step: 0.01 },
-    displacementScale: { value: 0.1, min: 0, max: 1, step: 0.01 },
-    emissiveIntensity: { value: 1.0, min: 0, max: 5, step: 0.1 },
-    metalness: { value: 0.5, min: 0, max: 1, step: 0.01 },
-    roughness: { value: 0.5, min: 0, max: 1, step: 0.01 },
+  // Initialize Leva controls with context values
+  useControls({
+    bumpScale: {
+      value: materialParams.bumpScale,
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (value) => updateMaterialParams("bumpScale", value),
+    },
+    displacementScale: {
+      value: materialParams.displacementScale,
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (value) => updateMaterialParams("displacementScale", value),
+    },
+    emissiveIntensity: {
+      value: materialParams.emissiveIntensity,
+      min: 0,
+      max: 5,
+      step: 0.1,
+      onChange: (value) => updateMaterialParams("emissiveIntensity", value),
+    },
+    metalness: {
+      value: materialParams.metalness,
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (value) => updateMaterialParams("metalness", value),
+    },
+    roughness: {
+      value: materialParams.roughness,
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (value) => updateMaterialParams("roughness", value),
+    },
   });
 
   // Load the model when the component mounts
@@ -66,7 +94,6 @@ const FabricPreview = () => {
 
         currentModel.traverse((child) => {
           if (child.isMesh) {
-            // Initialize the material config with default values
             const materialConfig = {
               map: null,
               bumpMap: null,
@@ -80,11 +107,7 @@ const FabricPreview = () => {
               aoMap: null,
               metalnessMap: null,
               roughnessMap: null,
-              metalness,
-              roughness,
-              bumpScale,
-              displacementScale,
-              emissiveIntensity,
+              ...materialParams,
               side: DoubleSide,
             };
 
@@ -122,7 +145,7 @@ const FabricPreview = () => {
                     case "Opacity":
                       materialConfig.alphaMap = texture;
                       break;
-                    case "AO": // Ambient Occlusion
+                    case "AO":
                       materialConfig.aoMap = texture;
                       break;
                     case "Metalness":
@@ -146,15 +169,7 @@ const FabricPreview = () => {
     };
 
     applyMaterial();
-  }, [
-    currentModel,
-    connectedMaps,
-    bumpScale,
-    displacementScale,
-    emissiveIntensity,
-    metalness,
-    roughness,
-  ]);
+  }, [currentModel, connectedMaps, materialParams]);
 
   return (
     <>

@@ -1,0 +1,38 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Folderimport {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  sku             String
+  modelname       String
+  description     String
+  status          String?       @default("active")
+  createdAt       DateTime      @default(now())
+  fbxs            Fbxa[]
+  lightSettings   LightSettings?
+}
+
+model Fbxa {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  downloadLink    String?
+  folderId        String        @db.ObjectId
+  folderimport    Folderimport  @relation(fields: [folderId], references: [id])
+}
+
+model LightSettings {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  folderId        String        @unique @db.ObjectId
+  lightOn         Boolean
+  lightIntensity  Float
+  lightPosition   String 
+  lightCastShadow Boolean
+  folder          Folderimport  @relation(fields: [folderId], references: [id])
+}
+
