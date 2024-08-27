@@ -11,26 +11,23 @@ import {
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
 
-const FabricPreview = () => {
+const FabricEditPreview = ({ parameters }) => {
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
-
-  const ab = materialParams.metalness;
-  console.log(ab);
 
   const modelPath = "/FabricTexture.fbx";
 
   useControls({
     bumpScale: {
-      value: materialParams.bumpScale,
+      value: parameters.bumpScale,
       min: 0,
       max: 1,
       step: 0.01,
       onChange: (value) => updateMaterialParams("bumpScale", value),
     },
     displacementScale: {
-      value: materialParams.displacementScale,
+      value: parameters.displacementScale,
       min: 0,
       max: 1,
       step: 0.01,
@@ -59,7 +56,6 @@ const FabricPreview = () => {
     },
   });
 
-  // Load the model when the component mounts
   useEffect(() => {
     const loadModel = async () => {
       if (currentModel) {
@@ -85,7 +81,6 @@ const FabricPreview = () => {
     loadModel();
   }, [modelPath]);
 
-  // Apply textures when nodes are connected or files are uploaded
   useEffect(() => {
     const applyMaterial = () => {
       if (currentModel && Object.keys(connectedMaps).length > 0) {
@@ -110,56 +105,65 @@ const FabricPreview = () => {
               side: DoubleSide,
             };
 
-            Object.entries(connectedMaps).forEach(([mapType, file]) => {
-              if (file) {
-                loader.load(URL.createObjectURL(file), (texture) => {
-                  texture.colorSpace = SRGBColorSpace;
-                  texture.needsUpdate = true;
+            Object.entries(connectedMaps).forEach(([mapType, fileOrUrl]) => {
+              if (fileOrUrl) {
+                const textureLoader = loader.load(
+                  typeof fileOrUrl === "string"
+                    ? fileOrUrl
+                    : URL.createObjectURL(fileOrUrl),
+                  (texture) => {
+                    texture.colorSpace = SRGBColorSpace;
+                    texture.needsUpdate = true;
 
-                  switch (mapType) {
-                    case "Diffuse":
-                      materialConfig.map = texture;
-                      break;
-                    case "Bump":
-                      materialConfig.bumpMap = texture;
-                      break;
-                    case "Normal":
-                      materialConfig.normalMap = texture;
-                      break;
-                    case "Reflection":
-                      materialConfig.envMap = texture;
-                      break;
-                    case "Refraction":
-                      materialConfig.roughnessMap = texture;
-                      break;
-                    case "Displacement":
-                      materialConfig.displacementMap = texture;
-                      break;
-                    case "Specular":
-                      materialConfig.specularMap = texture;
-                      break;
-                    case "Emissive":
-                      materialConfig.emissiveMap = texture;
-                      break;
-                    case "Opacity":
-                      materialConfig.alphaMap = texture;
-                      break;
-                    case "AO":
-                      materialConfig.aoMap = texture;
-                      break;
-                    case "Metalness":
-                      materialConfig.metalnessMap = texture;
-                      break;
-                    case "Roughness":
-                      materialConfig.roughnessMap = texture;
-                      break;
-                    default:
-                      break;
+                    switch (mapType) {
+                      case "Diffuse":
+                        materialConfig.map = texture;
+                        break;
+                      case "Bump":
+                        materialConfig.bumpMap = texture;
+                        break;
+                      case "Normal":
+                        materialConfig.normalMap = texture;
+                        break;
+                      case "Reflection":
+                        materialConfig.envMap = texture;
+                        break;
+                      case "Refraction":
+                        materialConfig.roughnessMap = texture;
+                        break;
+                      case "Displacement":
+                        materialConfig.displacementMap = texture;
+                        break;
+                      case "Specular":
+                        materialConfig.specularMap = texture;
+                        break;
+                      case "Emissive":
+                        materialConfig.emissiveMap = texture;
+                        break;
+                      case "Opacity":
+                        materialConfig.alphaMap = texture;
+                        break;
+                      case "AO":
+                        materialConfig.aoMap = texture;
+                        break;
+                      case "Metalness":
+                        materialConfig.metalnessMap = texture;
+                        break;
+                      case "Roughness":
+                        materialConfig.roughnessMap = texture;
+                        break;
+                      default:
+                        break;
+                    }
+
+                    child.material = new MeshPhysicalMaterial(materialConfig);
+                    child.material.needsUpdate = true;
                   }
+                );
 
-                  child.material = new MeshPhysicalMaterial(materialConfig);
-                  child.material.needsUpdate = true;
-                });
+                if (typeof fileOrUrl !== "string") {
+                  textureLoader.dispose();
+                }
               }
             });
           }
@@ -183,4 +187,4 @@ const FabricPreview = () => {
   );
 };
 
-export default FabricPreview;
+export default FabricEditPreview;

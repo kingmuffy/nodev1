@@ -1,4 +1,6 @@
-import React, { useCallback, useState, useContext } from "react";
+"use client";
+
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -8,17 +10,10 @@ import ReactFlow, {
   ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import MainNode from "./MainNode";
-import MapNode from "./MapNode";
-import { MapContext } from "../MapContext";
-import {
-  Snackbar,
-  Alert,
-  Button,
-  TextField,
-  CircularProgress,
-} from "@mui/material";
-import axios from "axios";
+import MainNode from "../../../components/MainNode";
+import MapNodeEdit from "../../../components/MapNodeEdit";
+import { MapContext } from "../../../MapContext";
+import { Snackbar, Alert, Button, TextField } from "@mui/material";
 
 const mapNames = [
   "Diffuse",
@@ -35,38 +30,27 @@ const mapNames = [
   "Roughness",
 ];
 
-const initialNodes = [
-  {
-    id: "main-node",
-    type: "mainNode",
-    data: { label: "Mesh Physical Material", maps: mapNames },
-    position: { x: 400, y: 50 },
-  },
-];
-
-const initialEdges = [];
-
 const nodeTypes = {
   mainNode: MainNode,
-  mapNode: MapNode,
+  mapNodeEdit: MapNodeEdit,
 };
 
-const edgeOptions = {
-  style: { strokeWidth: 4 },
-};
+const EditFabric = ({ parameters }) => {
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const {
+    connectedMaps,
+    materialParams,
+    updateConnectedMaps,
+    updateMaterialParams,
+  } = useContext(MapContext);
 
-const ControlPanel = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { connectedMaps, materialParams, updateConnectedMaps } =
-    useContext(MapContext);
-
-  const [fabricName, setFabricName] = useState("");
-  const [fabricColor, setFabricColor] = useState("");
+  const [fabricName, setFabricName] = useState(parameters.fabricName || "");
+  const [fabricColor, setFabricColor] = useState(parameters.fabricColor || "");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const updateNodeData = useCallback(
     (nodeId, file, thumbnail, label) => {
@@ -89,6 +73,80 @@ const ControlPanel = () => {
     },
     [setNodes, updateConnectedMaps]
   );
+
+  useEffect(() => {
+    if (parameters && !isLoaded) {
+      // Populate the material parameters from the fetched data
+      Object.keys(materialParams).forEach((param) => {
+        if (parameters[param] !== undefined) {
+          updateMaterialParams(param, parameters[param]);
+        }
+      });
+
+      // Initialize nodes based on the parameters
+      const initialNodes = [
+        {
+          id: "main-node",
+          type: "mainNode",
+          data: { label: "Mesh Physical Material", maps: mapNames },
+          position: { x: 400, y: 50 },
+        },
+      ];
+
+      const newEdges = [];
+
+      Object.entries(parameters).forEach(([key, value]) => {
+        if (key.endsWith("MapUrl") && value) {
+          const mapType =
+            key.replace("MapUrl", "").charAt(0).toUpperCase() +
+            key.replace("MapUrl", "").slice(1);
+
+          // Ensure the connectedMaps are updated with the correct URLs
+          updateConnectedMaps(mapType, value);
+
+          const newNode = {
+            id: `${mapType}-node`,
+            type: "mapNodeEdit",
+            position: {
+              x: 100,
+              y: 150 + Object.keys(connectedMaps).length * 100,
+            },
+            data: {
+              label: mapType,
+              file: value,
+              thumbnail: value,
+              updateNodeData,
+            },
+          };
+
+          initialNodes.push(newNode);
+
+          // Automatically connect nodes based on their labels
+          const targetHandle = mapNames.indexOf(mapType).toString();
+          newEdges.push({
+            id: `${mapType}-edge`,
+            source: `${mapType}-node`,
+            target: "main-node",
+            targetHandle: `handle-${targetHandle}`,
+          });
+        }
+      });
+
+      setNodes(initialNodes);
+      setEdges(newEdges);
+      setIsLoaded(true);
+    }
+  }, [
+    parameters,
+    materialParams,
+    updateMaterialParams,
+    updateConnectedMaps,
+    isLoaded,
+    setNodes,
+    setEdges,
+    connectedMaps,
+    updateNodeData,
+  ]);
 
   const onConnect = useCallback(
     (params) => {
@@ -204,44 +262,14 @@ const ControlPanel = () => {
       id: `node-${nodes.length + 1}`,
       data: { label: [], thumbnail: null, updateNodeData },
       position: { x: Math.random() * 250 + 100, y: Math.random() * 250 + 50 },
-      type: "mapNode",
+      type: "mapNodeEdit",
     };
     setNodes((nds) => nds.concat(newNode));
   }, [nodes, setNodes, updateNodeData]);
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-
-      formData.append("fabricName", fabricName);
-      formData.append("fabricColor", fabricColor);
-
-      for (const [mapType, file] of Object.entries(connectedMaps)) {
-        if (file) {
-          const formKey = `${mapType.toLowerCase()}MapUrl`;
-          formData.append(formKey, file);
-        }
-      }
-
-      for (const [paramName, value] of Object.entries(materialParams)) {
-        formData.append(paramName, value);
-      }
-
-      const response = await axios.post("/api/fabric", formData);
-
-      if (response.data.status === "success") {
-        setSnackbarMessage("Fabric data saved successfully!");
-      } else {
-        setSnackbarMessage("Failed to save fabric data.");
-      }
-    } catch (error) {
-      console.error("Error saving fabric data:", error);
-      setSnackbarMessage("Error saving fabric data.");
-    } finally {
-      setLoading(false);
-      setSnackbarOpen(true);
-    }
+  const handleSave = () => {
+    setSnackbarMessage("Save editing currently disabled");
+    setSnackbarOpen(true);
   };
 
   return (
@@ -258,7 +286,6 @@ const ControlPanel = () => {
             onNodeContextMenu={onNodeContextMenu}
             nodeTypes={nodeTypes}
             fitView
-            defaultEdgeOptions={edgeOptions} // Use defaultEdgeOptions for edge styles
           >
             <Controls />
             <Background />
@@ -291,17 +318,15 @@ const ControlPanel = () => {
           />
           <Button
             onClick={addNode}
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            sx={{ marginRight: "7px" }}
+            className="p-2 bg-blue-500 rounded hover:bg-blue-700"
           >
-            CREATE NODE
+            Create Node
           </Button>
           <Button
             onClick={handleSave}
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            disabled={loading}
+            className="mt-4 p-2 bg-green-500 rounded hover:bg-green-700"
           >
-            {loading ? <CircularProgress size={20} color="inherit" /> : "SAVE"}
+            Save
           </Button>
         </div>
       </ReactFlowProvider>
@@ -344,4 +369,4 @@ const ControlPanel = () => {
   );
 };
 
-export default ControlPanel;
+export default EditFabric;

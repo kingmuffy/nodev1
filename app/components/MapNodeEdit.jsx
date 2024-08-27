@@ -1,10 +1,23 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Handle, Position } from "reactflow";
-import ImageIcon from "@mui/icons-material/Image"; // Importing an icon from MUI Icons
 
-const MapNode = ({ id, data }) => {
+const MapNodeEdit = ({ id, data }) => {
   const fileInputRef = useRef(null);
+  const [thumbnail, setThumbnail] = useState(
+    data.thumbnail || "/placeholder-icon.png"
+  );
+  const [label, setLabel] = useState(data.label || "Map Node");
+
+  useEffect(() => {
+    // Update the label and thumbnail based on data updates
+    if (data.thumbnail) {
+      setThumbnail(data.thumbnail);
+    }
+    if (data.label) {
+      setLabel(data.label);
+    }
+  }, [data.thumbnail, data.label]);
 
   const handleImageClick = () => {
     fileInputRef.current.click();
@@ -15,6 +28,7 @@ const MapNode = ({ id, data }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        setThumbnail(reader.result);
         data.updateNodeData(id, file, reader.result, data.label);
       };
       reader.readAsDataURL(file);
@@ -41,7 +55,7 @@ const MapNode = ({ id, data }) => {
           fontSize: "14px",
         }}
       >
-        {data.label || "Map Node"}
+        {label}
       </strong>
       <div
         style={{
@@ -59,15 +73,11 @@ const MapNode = ({ id, data }) => {
         }}
         onClick={handleImageClick}
       >
-        {data.thumbnail ? (
-          <img
-            src={data.thumbnail}
-            alt={data.label}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <ImageIcon style={{ width: "50%", height: "50%", color: "#ccc" }} />
-        )}
+        <img
+          src={thumbnail}
+          alt={label}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
       </div>
       <input
         type="file"
@@ -84,7 +94,7 @@ const MapNode = ({ id, data }) => {
   );
 };
 
-MapNode.propTypes = {
+MapNodeEdit.propTypes = {
   id: PropTypes.string.isRequired,
   data: PropTypes.shape({
     label: PropTypes.string.isRequired,
@@ -93,4 +103,4 @@ MapNode.propTypes = {
   }).isRequired,
 };
 
-export default MapNode;
+export default MapNodeEdit;

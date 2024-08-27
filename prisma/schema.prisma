@@ -35,4 +35,26 @@ model LightSettings {
   lightCastShadow Boolean
   folder          Folderimport  @relation(fields: [folderId], references: [id])
 }
-
+model FabricMap {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  diffuseMapUrl         String?  // URL to Diffuse map in S3
+  reflectionMapUrl      String?  // URL to Reflection map in S3
+  refractionMapUrl      String?  // URL to Refraction map in S3
+  bumpMapUrl            String?  // URL to Bump map in S3
+  normalMapUrl          String?  // URL to Normal map in S3
+  displacementMapUrl    String?  // URL to Displacement map in S3
+  specularMapUrl        String?  // URL to Specular map in S3
+  emissiveMapUrl        String?  // URL to Emissive map in S3
+  opacityMapUrl         String?  // URL to Opacity map in S3
+  aoMapUrl              String?  // URL to Ambient Occlusion map in S3
+  metalnessMapUrl       String?  // URL to Metalness map in S3
+  roughnessMapUrl       String?  // URL to Roughness map in S3
+  bumpScale             Float?   // Bump scale parameter
+  displacementScale     Float?   // Displacement scale parameter
+  emissiveIntensity     Float?   // Emissive intensity parameter
+  metalness             Float?   // Metalness parameter
+  roughness             Float?   // Roughness parameter
+  fabricName            String?  // Name of the fabric
+  fabricColor           String?  // Color of the fabric
+  createdAt             DateTime @default(now())
+}

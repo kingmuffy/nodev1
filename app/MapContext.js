@@ -1,4 +1,3 @@
-// MapContext.js
 import React, { createContext, useState } from "react";
 
 export const MapContext = createContext();
@@ -6,11 +5,11 @@ export const MapContext = createContext();
 export const MapProvider = ({ children }) => {
   const [connectedMaps, setConnectedMaps] = useState({});
   const [materialParams, setMaterialParams] = useState({
-    bumpScale: 0.3,
-    displacementScale: 0.1,
-    emissiveIntensity: 1.0,
-    metalness: 0.5,
-    roughness: 0.5,
+    bumpScale: 0.0,
+    displacementScale: 0.0,
+    emissiveIntensity: 0.0,
+    metalness: 0.0,
+    roughness: 1.0,
   });
 
   const updateConnectedMaps = (mapType, file) => {

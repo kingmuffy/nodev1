@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid"; // Import UUID for unique file names
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -35,37 +35,46 @@ async function uploadFileToS3(fileBuffer, fileName, contentType) {
   }
 }
 
-export async function POST(request) {
+export async function PUT(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const fabricId = searchParams.get("id");
+
+    if (!fabricId) {
+      console.error("Fabric ID is required");
+      return NextResponse.json(
+        { status: "error", message: "Fabric ID is required." },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
     console.log("Form Data received:", formData);
 
-    // Prepare object to store S3 URLs, material parameters, and fabric details
-    const fabricData = {
-      diffuseMapUrl: null,
-      reflectionMapUrl: null,
-      refractionMapUrl: null,
-      bumpMapUrl: null,
-      normalMapUrl: null,
-      displacementMapUrl: null,
-      specularMapUrl: null,
-      emissiveMapUrl: null,
-      opacityMapUrl: null,
-      aoMapUrl: null,
-      metalnessMapUrl: null,
-      roughnessMapUrl: null,
+    const existingFabric = await prisma.fabricMap.findUnique({
+      where: { id: parseInt(fabricId) },
+    });
+
+    if (!existingFabric) {
+      console.error("Fabric not found:", fabricId);
+      return NextResponse.json(
+        { status: "error", message: "Fabric not found." },
+        { status: 404 }
+      );
+    }
+
+    const updatedFabricData = {
       bumpScale: parseFloat(formData.get("bumpScale")),
       displacementScale: parseFloat(formData.get("displacementScale")),
       emissiveIntensity: parseFloat(formData.get("emissiveIntensity")),
       metalness: parseFloat(formData.get("metalness")),
       roughness: parseFloat(formData.get("roughness")),
-      fabricName: formData.get("fabricName"), // Get fabric name
-      fabricColor: formData.get("fabricColor"), // Get fabric color
+      fabricName: formData.get("fabricName"),
+      fabricColor: formData.get("fabricColor"),
     };
 
-    console.log("Initial fabric data:", fabricData);
+    console.log("Initial updated fabric data:", updatedFabricData);
 
-    // List of map types to upload
     const mapTypes = [
       "diffuseMapUrl",
       "reflectionMapUrl",
@@ -81,7 +90,6 @@ export async function POST(request) {
       "roughnessMapUrl",
     ];
 
-    // Loop through each map type and upload to S3 if file exists
     for (const mapType of mapTypes) {
       const file = formData.get(mapType);
       if (file && file.size > 0) {
@@ -91,26 +99,31 @@ export async function POST(request) {
         const contentType = file.type;
 
         const fileUrl = await uploadFileToS3(fileBuffer, fileName, contentType);
-        fabricData[mapType] = fileUrl;
+        updatedFabricData[mapType] = fileUrl;
+      } else if (existingFabric[mapType]) {
+        updatedFabricData[mapType] = existingFabric[mapType];
       } else {
-        console.log(`No file uploaded for ${mapType}`);
+        updatedFabricData[mapType] = null;
       }
     }
 
-    console.log("Final fabric data before saving to DB:", fabricData);
+    console.log(
+      "Final updated fabric data before saving to DB:",
+      updatedFabricData
+    );
 
-    // Save fabric data to the database
-    const savedFabric = await prisma.fabricMap.create({
-      data: fabricData,
+    const updatedFabric = await prisma.fabricMap.update({
+      where: { id: parseInt(fabricId) },
+      data: updatedFabricData,
     });
 
-    console.log("Saved Fabric Data:", savedFabric);
+    console.log("Updated Fabric Data:", updatedFabric);
 
-    return NextResponse.json({ status: "success", fabric: savedFabric });
+    return NextResponse.json({ status: "success", fabric: updatedFabric });
   } catch (error) {
-    console.error("Error handling POST request:", error);
+    console.error("Error handling PUT request:", error);
     return NextResponse.json(
-      { status: "error", message: "Failed to upload fabric data." },
+      { status: "error", message: "Failed to update fabric data." },
       { status: 500 }
     );
   }

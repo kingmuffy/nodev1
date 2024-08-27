@@ -1,5 +1,22 @@
 import React from "react";
 import { Handle, Position } from "reactflow";
+import { Tooltip } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+
+const mapInfo = {
+  Diffuse: "Diffuse maps define the base color of the material.",
+  Reflection: "Reflection maps control how reflective the surface is.",
+  Refraction: "Refraction maps define how light bends through the material.",
+  Bump: "Bump maps add surface detail without changing geometry.",
+  Normal: "Normal maps add more detailed surface orientation.",
+  Displacement: "Displacement maps actually move the surface geometry.",
+  Specular: "Specular maps define the shininess and highlight size.",
+  Emissive: "Emissive maps make the material appear self-lit.",
+  Opacity: "Opacity maps control transparency.",
+  AO: "Ambient Occlusion maps add shading based on environment occlusion.",
+  Metalness: "Metalness maps control how metallic the surface looks.",
+  Roughness: "Roughness maps define how rough or smooth the surface is.",
+};
 
 const MainNode = ({ data }) => (
   <div
@@ -35,7 +52,21 @@ const MainNode = ({ data }) => (
             position: "relative",
           }}
         >
-          <span style={{ fontSize: "12px" }}>{map}</span>
+          <span
+            style={{ fontSize: "12px", display: "flex", alignItems: "center" }}
+          >
+            {map}
+            <Tooltip title={mapInfo[map]} arrow>
+              <InfoOutlinedIcon
+                style={{
+                  marginLeft: "5px",
+                  fontSize: "12px", // Reduced the font size
+                  color: "#2196f3",
+                  cursor: "pointer",
+                }}
+              />
+            </Tooltip>
+          </span>
           <Handle
             type="target"
             position={Position.Left}
