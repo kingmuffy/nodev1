@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid"; // Import UUID for unique file names
-
+import { revalidatePath } from "next/cache";
 const prisma = new PrismaClient();
 
 const s3Client = new S3Client({
@@ -103,6 +103,7 @@ export async function POST(request) {
     const savedFabric = await prisma.fabricMap.create({
       data: fabricData,
     });
+    revalidatePath("/fabric/list");
 
     console.log("Saved Fabric Data:", savedFabric);
 

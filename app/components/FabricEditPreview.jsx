@@ -107,6 +107,7 @@ const FabricEditPreview = ({ parameters }) => {
 
             Object.entries(connectedMaps).forEach(([mapType, fileOrUrl]) => {
               if (fileOrUrl) {
+                console.log(`Loading texture for ${mapType}:`, fileOrUrl); // Log texture loading
                 const textureLoader = loader.load(
                   typeof fileOrUrl === "string"
                     ? fileOrUrl
