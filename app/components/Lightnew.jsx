@@ -18,6 +18,14 @@ const Lightnew = () => {
     pointOn2,
     pointIntensity2,
     pointPosition2,
+    spotOn1,
+    spotIntensity1,
+    spotPosition1,
+    spotAngle1,
+    spotOn2,
+    spotIntensity2,
+    spotPosition2,
+    spotAngle2,
   } = useControls({
     "Hemisphere Light": folder({
       hemiOn: true,
@@ -40,18 +48,34 @@ const Lightnew = () => {
       pointIntensity2: { value: 1, min: 0, max: 10, step: 0.1 },
       pointPosition2: { value: [-5, 5, -5], step: 1 },
     }),
+    "Spot Light 1": folder({
+      spotOn1: true,
+      spotIntensity1: { value: 1, min: 0, max: 10, step: 0.1 },
+      spotPosition1: { value: [5, 10, 5], step: 1 },
+      spotAngle1: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
+    }),
+    "Spot Light 2": folder({
+      spotOn2: true,
+      spotIntensity2: { value: 1, min: 0, max: 10, step: 0.1 },
+      spotPosition2: { value: [-5, 10, -5], step: 1 },
+      spotAngle2: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
+    }),
   });
 
   const hemiLightRef = useRef();
   const dirLightRef = useRef();
   const pointLightRef1 = useRef();
   const pointLightRef2 = useRef();
+  const spotLightRef1 = useRef();
+  const spotLightRef2 = useRef();
 
-  // Always call useHelper, but the helpers will only appear when the lights are on
-  useHelper(hemiLightRef, THREE.HemisphereLightHelper, hemiOn ? 1 : 0);
-  useHelper(dirLightRef, THREE.DirectionalLightHelper, dirOn ? 1 : 0);
-  useHelper(pointLightRef1, THREE.PointLightHelper, pointOn1 ? 1 : 0);
-  useHelper(pointLightRef2, THREE.PointLightHelper, pointOn2 ? 1 : 0);
+  // Adding colored helpers
+  useHelper(hemiLightRef, THREE.HemisphereLightHelper, hemiOn ? 1 : 0, "cyan");
+  useHelper(dirLightRef, THREE.DirectionalLightHelper, dirOn ? 1 : 0, "green");
+  useHelper(pointLightRef1, THREE.PointLightHelper, pointOn1 ? 1 : 0, "red");
+  useHelper(pointLightRef2, THREE.PointLightHelper, pointOn2 ? 1 : 0, "blue");
+  useHelper(spotLightRef1, THREE.SpotLightHelper, spotOn1 ? 1 : 0, "yellow");
+  useHelper(spotLightRef2, THREE.SpotLightHelper, spotOn2 ? 1 : 0, "purple");
 
   // Update the helpers when the light positions change
   useEffect(() => {
@@ -71,6 +95,20 @@ const Lightnew = () => {
       pointLightRef2.current.position.set(...pointPosition2);
     }
   }, [pointPosition2]);
+
+  useEffect(() => {
+    if (spotLightRef1.current) {
+      spotLightRef1.current.position.set(...spotPosition1);
+      spotLightRef1.current.angle = spotAngle1;
+    }
+  }, [spotPosition1, spotAngle1]);
+
+  useEffect(() => {
+    if (spotLightRef2.current) {
+      spotLightRef2.current.position.set(...spotPosition2);
+      spotLightRef2.current.angle = spotAngle2;
+    }
+  }, [spotPosition2, spotAngle2]);
 
   return (
     <>
@@ -103,6 +141,24 @@ const Lightnew = () => {
           ref={pointLightRef2}
           intensity={pointIntensity2}
           position={pointPosition2}
+          castShadow
+        />
+      )}
+      {spotOn1 && (
+        <spotLight
+          ref={spotLightRef1}
+          intensity={spotIntensity1}
+          position={spotPosition1}
+          angle={spotAngle1}
+          castShadow
+        />
+      )}
+      {spotOn2 && (
+        <spotLight
+          ref={spotLightRef2}
+          intensity={spotIntensity2}
+          position={spotPosition2}
+          angle={spotAngle2}
           castShadow
         />
       )}
