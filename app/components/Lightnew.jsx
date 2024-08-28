@@ -47,10 +47,11 @@ const Lightnew = () => {
   const pointLightRef1 = useRef();
   const pointLightRef2 = useRef();
 
-  useHelper(hemiLightRef, THREE.HemisphereLightHelper, 1);
-  useHelper(dirLightRef, THREE.DirectionalLightHelper, 1);
-  useHelper(pointLightRef1, THREE.PointLightHelper, 1);
-  useHelper(pointLightRef2, THREE.PointLightHelper, 1);
+  // Always call useHelper, but the helpers will only appear when the lights are on
+  useHelper(hemiLightRef, THREE.HemisphereLightHelper, hemiOn ? 1 : 0);
+  useHelper(dirLightRef, THREE.DirectionalLightHelper, dirOn ? 1 : 0);
+  useHelper(pointLightRef1, THREE.PointLightHelper, pointOn1 ? 1 : 0);
+  useHelper(pointLightRef2, THREE.PointLightHelper, pointOn2 ? 1 : 0);
 
   // Update the helpers when the light positions change
   useEffect(() => {
