@@ -19,7 +19,7 @@ const FabricPreview = () => {
     useContext(MapContext);
   const guiRef = useRef(null); // Ref for GUI container
 
-  const modelPath = "/FabricTexture.fbx";
+  const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
 
   useEffect(() => {
     const guiContainer = guiRef.current;
