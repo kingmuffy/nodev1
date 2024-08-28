@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, TransformControls } from "@react-three/drei";
 import {
   TextureLoader,
   SRGBColorSpace,
   MeshPhysicalMaterial,
   DoubleSide,
+  DirectionalLightHelper,
+  SpotLightHelper,
+  PointLightHelper,
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
@@ -17,6 +20,9 @@ const FabricPreview = () => {
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
   const guiRef = useRef(null);
+  const directionalLightRef = useRef(null);
+  const spotLightRef = useRef(null);
+  const pointLightRef = useRef(null);
 
   const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
 
@@ -237,20 +243,49 @@ const FabricPreview = () => {
           <ambientLight intensity={ambientIntensity} color={ambientColor} />
         )}
         {directionalLightOn && (
-          <directionalLight
-            intensity={directionalIntensity}
-            position={directionalPosition}
-          />
+          <>
+            <TransformControls>
+              <directionalLight
+                ref={directionalLightRef}
+                intensity={directionalIntensity}
+                position={directionalPosition}
+              />
+            </TransformControls>
+            {directionalLightRef.current && (
+              <primitive
+                object={new DirectionalLightHelper(directionalLightRef.current)}
+              />
+            )}
+          </>
         )}
         {spotLightOn && (
-          <spotLight
-            intensity={spotIntensity}
-            position={spotPosition}
-            angle={spotAngle}
-          />
+          <>
+            <TransformControls>
+              <spotLight
+                ref={spotLightRef}
+                intensity={spotIntensity}
+                position={spotPosition}
+                angle={spotAngle}
+              />
+            </TransformControls>
+            {spotLightRef.current && (
+              <primitive object={new SpotLightHelper(spotLightRef.current)} />
+            )}
+          </>
         )}
         {pointLightOn && (
-          <pointLight intensity={pointIntensity} position={pointPosition} />
+          <>
+            <TransformControls>
+              <pointLight
+                ref={pointLightRef}
+                intensity={pointIntensity}
+                position={pointPosition}
+              />
+            </TransformControls>
+            {pointLightRef.current && (
+              <primitive object={new PointLightHelper(pointLightRef.current)} />
+            )}
+          </>
         )}
         {hemisphereLightOn && (
           <hemisphereLight
