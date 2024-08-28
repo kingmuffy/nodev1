@@ -1,116 +1,83 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, TransformControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { GridHelper } from "three";
 import {
   TextureLoader,
   SRGBColorSpace,
   MeshPhysicalMaterial,
   DoubleSide,
-  DirectionalLightHelper,
-  SpotLightHelper,
-  PointLightHelper,
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
-import { Leva, useControls } from "leva";
+import Lightnew from "./Lightnew"; // Importing the Lightnew component
 
 const FabricPreview = () => {
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
-  const guiRef = useRef(null);
-  const directionalLightRef = useRef(null);
-  const spotLightRef = useRef(null);
-  const pointLightRef = useRef(null);
+  const guiRef = useRef(null); // Ref for GUI container
 
-  const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
-
-  const {
-    ambientLightOn,
-    ambientIntensity,
-    ambientColor,
-    directionalLightOn,
-    directionalIntensity,
-    directionalPosition,
-    spotLightOn,
-    spotIntensity,
-    spotPosition,
-    spotAngle,
-    pointLightOn,
-    pointIntensity,
-    pointPosition,
-    hemisphereLightOn,
-    hemisphereSkyColor,
-    hemisphereGroundColor,
-    hemisphereIntensity,
-  } = useControls("Lights", {
-    ambientLightOn: true,
-    ambientIntensity: { value: 1.5, min: 0, max: 5, step: 0.1 },
-    ambientColor: "#ffffff",
-    directionalLightOn: true,
-    directionalIntensity: { value: 1, min: 0, max: 5, step: 0.1 },
-    directionalPosition: { value: [10, 10, 5], step: 1 },
-    spotLightOn: true,
-    spotIntensity: { value: 1, min: 0, max: 5, step: 0.1 },
-    spotPosition: { value: [10, 10, 10], step: 1 },
-    spotAngle: { value: Math.PI / 4, min: 0, max: Math.PI / 2 },
-    pointLightOn: true,
-    pointIntensity: { value: 1, min: 0, max: 5, step: 0.1 },
-    pointPosition: { value: [0, 10, 0], step: 1 },
-    hemisphereLightOn: true,
-    hemisphereSkyColor: "#ffffff",
-    hemisphereGroundColor: "#444444",
-    hemisphereIntensity: { value: 1, min: 0, max: 5, step: 0.1 },
-  });
+  const modelPath = "/FabricTexture.fbx";
 
   useEffect(() => {
     const guiContainer = guiRef.current;
-    const gui = new GUI({ container: guiContainer });
+    const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
 
-    const params = {
-      bumpScale: materialParams.bumpScale || 0,
-      displacementScale: materialParams.displacementScale || 0,
-      emissiveIntensity: materialParams.emissiveIntensity || 0,
-      metalness: materialParams.metalness || 0,
-      roughness: materialParams.roughness || 0,
-      displacementBias: materialParams.displacementBias || 0,
-      flatShading: materialParams.flatShading || false,
-      aoMapIntensity: materialParams.aoMapIntensity || 0,
-      clearcoat: materialParams.clearcoat || 0,
+    const defaultMaterialParams = {
+      bumpScale: 0,
+      displacementScale: 0,
+      emissiveIntensity: 0,
+      metalness: 0,
+      roughness: 0,
+      displacementBias: 0,
+      flatShading: false,
+      aoMapIntensity: 0,
+      clearcoat: 0,
     };
+
+    const params = { ...defaultMaterialParams, ...materialParams };
 
     gui
       .add(params, "bumpScale", 0, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("bumpScale", value));
+
     gui
       .add(params, "displacementScale", 0, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("displacementScale", value));
+
     gui
       .add(params, "emissiveIntensity", 0, 5)
       .step(0.01)
       .onChange((value) => updateMaterialParams("emissiveIntensity", value));
+
     gui
       .add(params, "metalness", 0, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("metalness", value));
+
     gui
       .add(params, "roughness", 0, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("roughness", value));
+
     gui
       .add(params, "displacementBias", -1, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("displacementBias", value));
+
     gui
       .add(params, "flatShading")
       .onChange((value) => updateMaterialParams("flatShading", value));
+
     gui
       .add(params, "aoMapIntensity", 0, 1)
       .step(0.01)
       .onChange((value) => updateMaterialParams("aoMapIntensity", value));
+
     gui
       .add(params, "clearcoat", 0, 1)
       .step(0.01)
@@ -154,7 +121,7 @@ const FabricPreview = () => {
 
   useEffect(() => {
     const applyMaterial = () => {
-      if (currentModel) {
+      if (currentModel && Object.keys(connectedMaps).length > 0) {
         const loader = new TextureLoader();
 
         currentModel.traverse((child) => {
@@ -238,70 +205,20 @@ const FabricPreview = () => {
 
   return (
     <>
-      <Canvas style={{ background: "#808080" }}>
-        {ambientLightOn && (
-          <ambientLight intensity={ambientIntensity} color={ambientColor} />
-        )}
-        {directionalLightOn && (
-          <>
-            <TransformControls>
-              <directionalLight
-                ref={directionalLightRef}
-                intensity={directionalIntensity}
-                position={directionalPosition}
-              />
-            </TransformControls>
-            {directionalLightRef.current && (
-              <primitive
-                object={new DirectionalLightHelper(directionalLightRef.current)}
-              />
-            )}
-          </>
-        )}
-        {spotLightOn && (
-          <>
-            <TransformControls>
-              <spotLight
-                ref={spotLightRef}
-                intensity={spotIntensity}
-                position={spotPosition}
-                angle={spotAngle}
-              />
-            </TransformControls>
-            {spotLightRef.current && (
-              <primitive object={new SpotLightHelper(spotLightRef.current)} />
-            )}
-          </>
-        )}
-        {pointLightOn && (
-          <>
-            <TransformControls>
-              <pointLight
-                ref={pointLightRef}
-                intensity={pointIntensity}
-                position={pointPosition}
-              />
-            </TransformControls>
-            {pointLightRef.current && (
-              <primitive object={new PointLightHelper(pointLightRef.current)} />
-            )}
-          </>
-        )}
-        {hemisphereLightOn && (
-          <hemisphereLight
-            intensity={hemisphereIntensity}
-            skyColor={hemisphereSkyColor}
-            groundColor={hemisphereGroundColor}
-          />
-        )}
+      <Canvas style={{ backgroundColor: "#808080" }}>
+        {" "}
+        {/* Setting the background color to grey */}
+        <Lightnew /> {/* Adding the Lightnew component */}
         {currentModel && <primitive object={currentModel} />}
+        <gridHelper args={[100, 100, "#ffffff", "#555555"]} />{" "}
+        {/* Adding Grid Helper */}
         <OrbitControls />
       </Canvas>
+      {/* GUI container */}
       <div
         ref={guiRef}
         style={{ position: "absolute", top: 0, right: 0, zIndex: 1000 }}
-      />
-      <Leva collapsed />
+      ></div>
     </>
   );
 };
