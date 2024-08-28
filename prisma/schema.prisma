@@ -35,6 +35,7 @@ model LightSettings {
   lightCastShadow Boolean
   folder          Folderimport  @relation(fields: [folderId], references: [id])
 }
+
 model FabricMap {
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   diffuseMapUrl         String?  // URL to Diffuse map in S3
@@ -54,6 +55,10 @@ model FabricMap {
   emissiveIntensity     Float?   // Emissive intensity parameter
   metalness             Float?   // Metalness parameter
   roughness             Float?   // Roughness parameter
+  displacementBias      Float?   // The offset of the displacement map's values on the mesh's vertices
+  flatShading           Boolean? // Whether the material is rendered with flat shading
+  aoMapIntensity        Float?   // The intensity of the ambient occlusion map
+  clearcoat             Float?   // The intensity of the clear coat layer
   fabricName            String?  // Name of the fabric
   fabricColor           String?  // Color of the fabric
   createdAt             DateTime @default(now())

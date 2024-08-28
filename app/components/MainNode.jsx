@@ -4,43 +4,46 @@ import { Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const mapInfo = {
-  Diffuse: "Diffuse maps define the base color of the material.",
-  Reflection: "Reflection maps control how reflective the surface is.",
-  Refraction: "Refraction maps define how light bends through the material.",
-  Bump: "Bump maps add surface detail without changing geometry.",
-  Normal: "Normal maps add more detailed surface orientation.",
-  Displacement: "Displacement maps actually move the surface geometry.",
-  Specular: "Specular maps define the shininess and highlight size.",
-  Emissive: "Emissive maps make the material appear self-lit.",
-  Opacity: "Opacity maps control transparency.",
-  AO: "Ambient Occlusion maps add shading based on environment occlusion.",
-  Metalness: "Metalness maps control how metallic the surface looks.",
-  Roughness: "Roughness maps define how rough or smooth the surface is.",
+  Diffuse: "Defines the base color of the material.",
+  Reflection: "Controls the reflectivity of the surface.",
+  Refraction: "Determines how light bends through the material.",
+  Bump: "Adds surface detail without changing geometry.",
+  Normal: "Enhances surface detail using normal vectors.",
+  Displacement: "Modifies the surface geometry for added detail.",
+  Specular: "Determines the shininess and highlight size.",
+  Emissive: "Makes the material appear self-illuminated.",
+  Opacity: "Controls the transparency of the material.",
+  AO: "Adds shading based on occlusion by surrounding objects.",
+  Metalness: "Gives the surface a metallic appearance.",
+  Roughness: "Determines the smoothness of the surface.",
 };
 
 const MainNode = ({ data }) => (
   <div
     style={{
-      padding: "15px",
-      backgroundColor: "#f9f9f9",
-      border: "1px solid #ddd",
-      borderRadius: "8px",
-      width: "300px",
+      padding: "12px 15px",
+      backgroundColor: "#f5f5f5", // Light background
+      border: "1px solid #ddd", // Lighter border for a subtle definition
+      borderRadius: "12px", // Rounded corners for a modern look
+      width: "280px", // Slightly wider for comfort
+      color: "#333", // Darker text for contrast
       fontFamily: "Barlow, sans-serif",
       position: "relative",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", // Soft shadow for depth
     }}
   >
     <strong
       style={{
         display: "block",
-        marginBottom: "15px",
-        fontSize: "16px",
+        marginBottom: "12px",
+        fontSize: "15px",
         textAlign: "center",
+        color: "#555", // Slightly lighter title color for elegance
       }}
     >
       {data.label}
     </strong>
-    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       {data.maps.map((map, index) => (
         <div
           key={index}
@@ -48,20 +51,27 @@ const MainNode = ({ data }) => (
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "5px",
+            padding: "6px 0",
+            borderBottom:
+              index !== data.maps.length - 1 ? "1px solid #e0e0e0" : "none", // Subtle divider
             position: "relative",
           }}
         >
           <span
-            style={{ fontSize: "12px", display: "flex", alignItems: "center" }}
+            style={{
+              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              color: "#333", // Darker color for map names
+            }}
           >
             {map}
             <Tooltip title={mapInfo[map]} arrow>
               <InfoOutlinedIcon
                 style={{
                   marginLeft: "5px",
-                  fontSize: "12px", // Reduced the font size
-                  color: "#2196f3",
+                  fontSize: "14px",
+                  color: "#888", // Lighter color for icons to make them less intrusive
                   cursor: "pointer",
                 }}
               />
@@ -72,12 +82,12 @@ const MainNode = ({ data }) => (
             position={Position.Left}
             id={`handle-${index}`}
             style={{
-              background: "#40E0D0",
-              width: "10px",
-              height: "10px",
-              borderRadius: "0%",
+              background: "#40E0D0", // Keeping the handle color vibrant
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
               position: "absolute",
-              left: "-15px",
+              left: "-12px",
               top: "50%",
               transform: "translateY(-50%)",
             }}

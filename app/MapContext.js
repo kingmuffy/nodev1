@@ -2,14 +2,20 @@ import React, { createContext, useState } from "react";
 
 export const MapContext = createContext();
 
-export const MapProvider = ({ children }) => {
+export const MapProvider = ({ children, initialMaterialParams }) => {
   const [connectedMaps, setConnectedMaps] = useState({});
+
+  // Initialize materialParams with initial values passed from props
   const [materialParams, setMaterialParams] = useState({
-    bumpScale: 0.0,
-    displacementScale: 0.0,
-    emissiveIntensity: 0.0,
-    metalness: 0.0,
-    roughness: 1.0,
+    bumpScale: initialMaterialParams?.bumpScale || 0.0,
+    displacementScale: initialMaterialParams?.displacementScale || 0.0,
+    emissiveIntensity: initialMaterialParams?.emissiveIntensity || 0.0,
+    metalness: initialMaterialParams?.metalness || 0.0,
+    roughness: initialMaterialParams?.roughness || 1.0,
+    displacementBias: initialMaterialParams?.displacementBias || 0.0, // New parameter
+    flatShading: initialMaterialParams?.flatShading || false, // New parameter
+    aoMapIntensity: initialMaterialParams?.aoMapIntensity || 0.0, // New parameter
+    clearcoat: initialMaterialParams?.clearcoat || 0.0, // New parameter
   });
 
   const updateConnectedMaps = (mapType, file) => {

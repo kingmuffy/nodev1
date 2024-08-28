@@ -39,7 +39,7 @@ const EditPage = ({ params }) => {
   }
 
   return (
-    <MapProvider>
+    <MapProvider initialMaterialParams={parameters}>
       <Split
         className="flex h-screen"
         sizes={[50, 50]}

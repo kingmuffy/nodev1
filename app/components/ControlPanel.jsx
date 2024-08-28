@@ -264,7 +264,8 @@ const ControlPanel = () => {
             <Background />
           </ReactFlow>
         </div>
-        <div className="fixed top-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
+        {/* Reposition the control panel to the bottom right */}
+        <div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
           <TextField
             label="Fabric Name"
             variant="filled"

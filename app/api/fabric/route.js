@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid"; // Import UUID for unique file names
 import { revalidatePath } from "next/cache";
+
 const prisma = new PrismaClient();
 
 const s3Client = new S3Client({
@@ -59,6 +60,10 @@ export async function POST(request) {
       emissiveIntensity: parseFloat(formData.get("emissiveIntensity")),
       metalness: parseFloat(formData.get("metalness")),
       roughness: parseFloat(formData.get("roughness")),
+      displacementBias: parseFloat(formData.get("displacementBias")), // New field
+      flatShading: formData.get("flatShading") === "true", // New field
+      aoMapIntensity: parseFloat(formData.get("aoMapIntensity")), // New field
+      clearcoat: parseFloat(formData.get("clearcoat")), // New field
       fabricName: formData.get("fabricName"), // Get fabric name
       fabricColor: formData.get("fabricColor"), // Get fabric color
     };

@@ -18,6 +18,7 @@ export default function Page() {
         </div>
         <div className="flex flex-col h-full">
           <ControlPanel />
+          <div></div>
         </div>
       </Split>
     </MapProvider>

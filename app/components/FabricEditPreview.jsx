@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Leva, useControls } from "leva";
 import {
   TextureLoader,
   SRGBColorSpace,
@@ -10,52 +9,116 @@ import {
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
+import { GUI } from "lil-gui";
 
 const FabricEditPreview = ({ parameters }) => {
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
+  const guiRef = useRef(null); // Ref for GUI container
 
   const modelPath = "/FabricTexture.fbx";
 
-  useControls({
-    bumpScale: {
-      value: parameters.bumpScale,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("bumpScale", value),
-    },
-    displacementScale: {
-      value: parameters.displacementScale,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("displacementScale", value),
-    },
-    emissiveIntensity: {
-      value: materialParams.emissiveIntensity,
-      min: 0,
-      max: 5,
-      step: 0.1,
-      onChange: (value) => updateMaterialParams("emissiveIntensity", value),
-    },
-    metalness: {
-      value: materialParams.metalness,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("metalness", value),
-    },
-    roughness: {
-      value: materialParams.roughness,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("roughness", value),
-    },
-  });
+  useEffect(() => {
+    const guiContainer = guiRef.current;
+    const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
 
+    const params = {
+      bumpScale: parameters.bumpScale || 0,
+      displacementScale: parameters.displacementScale || 0,
+      emissiveIntensity: parameters.emissiveIntensity || 0,
+      metalness: parameters.metalness || 0,
+      roughness: parameters.roughness || 0,
+      displacementBias: parameters.displacementBias || 0,
+      flatShading: parameters.flatShading || false,
+      aoMapIntensity: parameters.aoMapIntensity || 0,
+      clearcoat: parameters.clearcoat || 0,
+    };
+
+    // Setup the GUI controls
+    gui
+      .add(params, "bumpScale", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.bumpScale = value;
+        updateMaterialParams("bumpScale", value);
+      });
+
+    gui
+      .add(params, "displacementScale", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.displacementScale = value;
+        updateMaterialParams("displacementScale", value);
+      });
+
+    gui
+      .add(params, "emissiveIntensity", 0, 5)
+      .step(0.01)
+      .onChange((value) => {
+        params.emissiveIntensity = value;
+        updateMaterialParams("emissiveIntensity", value);
+      });
+
+    gui
+      .add(params, "metalness", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.metalness = value;
+        updateMaterialParams("metalness", value);
+      });
+
+    gui
+      .add(params, "roughness", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.roughness = value;
+        updateMaterialParams("roughness", value);
+      });
+
+    // New controls
+    gui
+      .add(params, "displacementBias", -1, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.displacementBias = value;
+        updateMaterialParams("displacementBias", value);
+      });
+
+    gui.add(params, "flatShading").onChange((value) => {
+      params.flatShading = value;
+      updateMaterialParams("flatShading", value);
+    });
+
+    gui
+      .add(params, "aoMapIntensity", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.aoMapIntensity = value;
+        updateMaterialParams("aoMapIntensity", value);
+      });
+
+    gui
+      .add(params, "clearcoat", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        params.clearcoat = value;
+        updateMaterialParams("clearcoat", value);
+      });
+
+    // Prevent scroll wheel from affecting other elements
+    gui.domElement.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    });
+
+    return () => {
+      gui.destroy();
+    };
+  }, [parameters, updateMaterialParams]);
+
+  // Load the model when the component mounts
   useEffect(() => {
     const loadModel = async () => {
       if (currentModel) {
@@ -81,9 +144,10 @@ const FabricEditPreview = ({ parameters }) => {
     loadModel();
   }, [modelPath]);
 
+  // Apply textures when nodes are connected or files are uploaded
   useEffect(() => {
     const applyMaterial = () => {
-      if (currentModel && Object.keys(connectedMaps).length > 0) {
+      if (currentModel) {
         const loader = new TextureLoader();
 
         currentModel.traverse((child) => {
@@ -107,8 +171,8 @@ const FabricEditPreview = ({ parameters }) => {
 
             Object.entries(connectedMaps).forEach(([mapType, fileOrUrl]) => {
               if (fileOrUrl) {
-                const textureLoader = loader.load(
-                  `${fileOrUrl}?r=${Math.floor(Math.random() * 100000)}`, // Cache busting
+                loader.load(
+                  `${fileOrUrl}?r=${Math.floor(Math.random() * 100000)}`,
                   (texture) => {
                     texture.colorSpace = SRGBColorSpace;
                     texture.needsUpdate = true;
@@ -158,10 +222,50 @@ const FabricEditPreview = ({ parameters }) => {
                     child.material.needsUpdate = true;
                   }
                 );
-
-                if (typeof fileOrUrl !== "string") {
-                  textureLoader.dispose();
+              } else {
+                // Handle removal of the texture if the fileOrUrl is null or undefined
+                switch (mapType) {
+                  case "Diffuse":
+                    materialConfig.map = null;
+                    break;
+                  case "Bump":
+                    materialConfig.bumpMap = null;
+                    break;
+                  case "Normal":
+                    materialConfig.normalMap = null;
+                    break;
+                  case "Reflection":
+                    materialConfig.envMap = null;
+                    break;
+                  case "Refraction":
+                    materialConfig.roughnessMap = null;
+                    break;
+                  case "Displacement":
+                    materialConfig.displacementMap = null;
+                    break;
+                  case "Specular":
+                    materialConfig.specularMap = null;
+                    break;
+                  case "Emissive":
+                    materialConfig.emissiveMap = null;
+                    break;
+                  case "Opacity":
+                    materialConfig.alphaMap = null;
+                    break;
+                  case "AO":
+                    materialConfig.aoMap = null;
+                    break;
+                  case "Metalness":
+                    materialConfig.metalnessMap = null;
+                    break;
+                  case "Roughness":
+                    materialConfig.roughnessMap = null;
+                    break;
+                  default:
+                    break;
                 }
+
+                child.material.needsUpdate = true;
               }
             });
           }
@@ -180,7 +284,11 @@ const FabricEditPreview = ({ parameters }) => {
         {currentModel && <primitive object={currentModel} />}
         <OrbitControls />
       </Canvas>
-      <Leva collapsed />
+      {/* GUI container */}
+      <div
+        ref={guiRef}
+        style={{ position: "absolute", top: 0, right: 0, zIndex: 1000 }}
+      ></div>
     </>
   );
 };

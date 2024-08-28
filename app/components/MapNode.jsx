@@ -24,31 +24,34 @@ const MapNode = ({ id, data }) => {
   return (
     <div
       style={{
-        padding: "10px",
+        display: "flex",
+        alignItems: "center",
         backgroundColor: "#f9f9f9",
         border: "1px solid #ddd",
         borderRadius: "8px",
-        width: "150px",
+        padding: "5px 10px",
         fontFamily: "Barlow, sans-serif",
-        textAlign: "center",
+        width: "200px", // Adjusted width for better label-thumbnail spacing
         position: "relative",
       }}
     >
       <strong
         style={{
-          display: "block",
-          marginBottom: "5px",
+          flex: 1,
+          textAlign: "left",
           fontSize: "14px",
+          paddingRight: "10px",
+          whiteSpace: "nowrap", // Prevent label from wrapping
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
         {data.label || "Map Node"}
       </strong>
       <div
         style={{
-          width: "80px",
-          height: "80px",
-          margin: "0 auto",
-          marginBottom: "5px",
+          width: "50px", // Smaller thumbnail size for a sleek look
+          height: "50px",
           borderRadius: "8px",
           overflow: "hidden",
           backgroundColor: "#f0f0f0",
@@ -78,7 +81,7 @@ const MapNode = ({ id, data }) => {
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: "#40E0D0", borderRadius: "0%" }}
+        style={{ background: "#40E0D0", borderRadius: "50%" }}
       />
     </div>
   );

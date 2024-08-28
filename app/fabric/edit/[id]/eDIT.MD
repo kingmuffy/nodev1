@@ -2,64 +2,64 @@
 
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import ReactFlow, {
-  addEdge,
-  useNodesState,
-  useEdgesState,
-  Controls,
-  Background,
-  ReactFlowProvider,
+addEdge,
+useNodesState,
+useEdgesState,
+Controls,
+Background,
+ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import MainNode from "../../../components/MainNode"; // Make sure this path is correct
-import MapNodeEdit from "../../../components/MapNodeEdit"; // Make sure this path is correct
+import MainNode from "../../../components/MainNode";
+import MapNodeEdit from "../../../components/MapNodeEdit";
 import { MapContext } from "../../../MapContext";
 import { Snackbar, Alert, Button, TextField } from "@mui/material";
 
 const mapNames = [
-  "Diffuse",
-  "Reflection",
-  "Refraction",
-  "Bump",
-  "Normal",
-  "Displacement",
-  "Specular",
-  "Emissive",
-  "Opacity",
-  "AO",
-  "Metalness",
-  "Roughness",
+"Diffuse",
+"Reflection",
+"Refraction",
+"Bump",
+"Normal",
+"Displacement",
+"Specular",
+"Emissive",
+"Opacity",
+"AO",
+"Metalness",
+"Roughness",
 ];
 
 const nodeTypes = {
-  mainNode: MainNode,
-  mapNodeEdit: MapNodeEdit,
+mainNode: MainNode,
+mapNodeEdit: MapNodeEdit,
 };
 
 const EditFabric = ({ parameters }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const {
-    connectedMaps,
-    materialParams,
-    updateConnectedMaps,
-    updateMaterialParams,
-  } = useContext(MapContext);
+const [nodes, setNodes, onNodesChange] = useNodesState([]);
+const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+const {
+connectedMaps,
+materialParams,
+updateConnectedMaps,
+updateMaterialParams,
+} = useContext(MapContext);
 
-  const [fabricName, setFabricName] = useState(parameters.fabricName || "");
-  const [fabricColor, setFabricColor] = useState(parameters.fabricColor || "");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+const [fabricName, setFabricName] = useState(parameters.fabricName || "");
+const [fabricColor, setFabricColor] = useState(parameters.fabricColor || "");
+const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [confirmDelete, setConfirmDelete] = useState(null);
+const [isLoaded, setIsLoaded] = useState(false);
 
-  const updateNodeData = useCallback(
-    (nodeId, file, thumbnail, label) => {
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === nodeId) {
-            const updatedLabelArray = node.data.label.includes(label)
-              ? node.data.label
-              : [...node.data.label, label];
+const updateNodeData = useCallback(
+(nodeId, file, thumbnail, label) => {
+setNodes((nds) =>
+nds.map((node) => {
+if (node.id === nodeId) {
+const updatedLabelArray = node.data.label.includes(label)
+? node.data.label
+: [...node.data.label, label];
 
             return {
               ...node,
@@ -72,15 +72,16 @@ const EditFabric = ({ parameters }) => {
       updateConnectedMaps(label, file);
     },
     [setNodes, updateConnectedMaps]
-  );
 
-  useEffect(() => {
-    if (parameters && !isLoaded) {
-      Object.keys(materialParams).forEach((param) => {
-        if (parameters[param] !== undefined) {
-          updateMaterialParams(param, parameters[param]);
-        }
-      });
+);
+
+useEffect(() => {
+if (parameters && !isLoaded) {
+Object.keys(materialParams).forEach((param) => {
+if (parameters[param] !== undefined) {
+updateMaterialParams(param, parameters[param]);
+}
+});
 
       const initialNodes = [
         {
@@ -135,21 +136,22 @@ const EditFabric = ({ parameters }) => {
       setEdges(newEdges);
       setIsLoaded(true);
     }
-  }, [
-    parameters,
-    materialParams,
-    updateMaterialParams,
-    updateConnectedMaps,
-    isLoaded,
-    setNodes,
-    setEdges,
-    connectedMaps,
-    updateNodeData,
-  ]);
 
-  const onConnect = useCallback(
-    (params) => {
-      const sourceNode = nodes.find((node) => node.id === params.source);
+}, [
+parameters,
+materialParams,
+updateMaterialParams,
+updateConnectedMaps,
+isLoaded,
+setNodes,
+setEdges,
+connectedMaps,
+updateNodeData,
+]);
+
+const onConnect = useCallback(
+(params) => {
+const sourceNode = nodes.find((node) => node.id === params.source);
 
       if (!sourceNode?.data.file) {
         setSnackbarMessage("Upload a map before connecting nodes.");
@@ -183,12 +185,13 @@ const EditFabric = ({ parameters }) => {
       }
     },
     [setEdges, nodes, setNodes, updateConnectedMaps]
-  );
 
-  const onEdgeDoubleClick = useCallback(
-    (event, edge) => {
-      event.stopPropagation();
-      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+);
+
+const onEdgeDoubleClick = useCallback(
+(event, edge) => {
+event.stopPropagation();
+setEdges((eds) => eds.filter((e) => e.id !== edge.id));
 
       const targetNode = nodes.find((node) => node.id === edge.target);
       const mapLabel = targetNode?.data.maps[edge.targetHandle.split("-")[1]];
@@ -198,14 +201,11 @@ const EditFabric = ({ parameters }) => {
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === edge.source) {
-            const currentLabels = Array.isArray(node.data.label)
-              ? node.data.label
-              : [];
             return {
               ...node,
               data: {
                 ...node.data,
-                label: currentLabels.filter((lbl) => lbl !== mapLabel),
+                label: node.data.label.filter((lbl) => lbl !== mapLabel),
               },
             };
           }
@@ -217,13 +217,14 @@ const EditFabric = ({ parameters }) => {
       setSnackbarOpen(true);
     },
     [setEdges, nodes, updateConnectedMaps]
-  );
 
-  const handleDeleteNode = useCallback(
-    (node) => {
-      const connectedEdges = edges.filter(
-        (edge) => edge.source === node.id || edge.target === node.id
-      );
+);
+
+const handleDeleteNode = useCallback(
+(node) => {
+const connectedEdges = edges.filter(
+(edge) => edge.source === node.id || edge.target === node.id
+);
 
       connectedEdges.forEach((edge) => {
         const targetNode = nodes.find((n) => n.id === edge.target);
@@ -241,44 +242,45 @@ const EditFabric = ({ parameters }) => {
       setSnackbarOpen(true);
     },
     [setNodes, setEdges, nodes, edges, updateConnectedMaps]
-  );
 
-  const onNodeContextMenu = useCallback((event, node) => {
-    event.preventDefault();
-    setConfirmDelete(node);
-  }, []);
+);
 
-  const handleConfirmDelete = useCallback(() => {
-    if (confirmDelete) {
-      handleDeleteNode(confirmDelete);
-      setConfirmDelete(null);
-    }
-  }, [confirmDelete, handleDeleteNode]);
+const onNodeContextMenu = useCallback((event, node) => {
+event.preventDefault();
+setConfirmDelete(node);
+}, []);
 
-  const handleSnackbarClose = useCallback(() => {
-    setSnackbarOpen(false);
-  }, []);
+const handleConfirmDelete = useCallback(() => {
+if (confirmDelete) {
+handleDeleteNode(confirmDelete);
+setConfirmDelete(null);
+}
+}, [confirmDelete, handleDeleteNode]);
 
-  const addNode = useCallback(() => {
-    const newNode = {
-      id: `node-${nodes.length + 1}`,
-      data: { label: [], thumbnail: null, updateNodeData },
-      position: { x: 100, y: nodes.length * 50 + 10 },
-      type: "mapNodeEdit",
-    };
-    setNodes((nds) => nds.concat(newNode));
-  }, [nodes, setNodes, updateNodeData]);
+const handleSnackbarClose = useCallback(() => {
+setSnackbarOpen(false);
+}, []);
 
-  const handleSave = () => {
-    setSnackbarMessage("Save editing currently disabled");
-    setSnackbarOpen(true);
-  };
+const addNode = useCallback(() => {
+const newNode = {
+id: `node-${nodes.length + 1}`,
+data: { label: [], thumbnail: null, updateNodeData },
+position: { x: 100, y: nodes.length \* 50 + 10 },
+type: "mapNodeEdit",
+};
+setNodes((nds) => nds.concat(newNode));
+}, [nodes, setNodes, updateNodeData]);
 
-  return (
-    <div className="flex h-full" onContextMenu={(e) => e.preventDefault()}>
-      <ReactFlowProvider>
-        <div className="flex-auto bg-gray-800 relative">
-          <ReactFlow
+const handleSave = () => {
+setSnackbarMessage("Save editing currently disabled");
+setSnackbarOpen(true);
+};
+
+return (
+<div className="flex h-full" onContextMenu={(e) => e.preventDefault()}>
+<ReactFlowProvider>
+<div className="flex-auto bg-gray-800 relative">
+<ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -289,50 +291,49 @@ const EditFabric = ({ parameters }) => {
             nodeTypes={nodeTypes}
             fitView
           >
-            <Controls />
-            <Background />
-          </ReactFlow>
-        </div>
-        <div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
-          <TextField
-            label="Fabric Name"
-            variant="filled"
-            value={fabricName}
-            onChange={(e) => setFabricName(e.target.value)}
-            fullWidth
-            sx={{
+<Controls />
+<Background />
+</ReactFlow>
+</div>
+<div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
+<TextField
+label="Fabric Name"
+variant="filled"
+value={fabricName}
+onChange={(e) => setFabricName(e.target.value)}
+fullWidth
+sx={{
               marginBottom: "1rem",
               backgroundColor: "white",
               borderRadius: "4px",
             }}
-          />
-          <TextField
-            label="Fabric Color"
-            variant="filled"
-            value={fabricColor}
-            onChange={(e) => setFabricColor(e.target.value)}
-            fullWidth
-            sx={{
+/>
+<TextField
+label="Fabric Color"
+variant="filled"
+value={fabricColor}
+onChange={(e) => setFabricColor(e.target.value)}
+fullWidth
+sx={{
               marginBottom: "1rem",
               backgroundColor: "white",
               borderRadius: "4px",
             }}
-          />
-          <Button
-            onClick={addNode}
-            className="p-2 bg-blue-500 rounded hover:bg-blue-700"
-            sx={{ marginBottom: "0.5rem" }}
-          >
-            Create Node
-          </Button>
-          <Button
+/>
+<Button
+onClick={addNode}
+className="p-2 bg-blue-500 rounded hover:bg-blue-700"
+sx={{ marginBottom: "0.5rem" }} >
+Create Node
+</Button>
+<Button
             onClick={handleSave}
             className="p-2 bg-green-500 rounded hover:bg-green-700"
           >
-            Save
-          </Button>
-        </div>
-      </ReactFlowProvider>
+Save
+</Button>
+</div>
+</ReactFlowProvider>
 
       <Snackbar
         open={snackbarOpen}
@@ -369,7 +370,8 @@ const EditFabric = ({ parameters }) => {
         </div>
       )}
     </div>
-  );
+
+);
 };
 
 export default EditFabric;

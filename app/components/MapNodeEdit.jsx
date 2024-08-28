@@ -10,7 +10,6 @@ const MapNodeEdit = ({ id, data }) => {
   const [label, setLabel] = useState(data.label || "Map Node");
 
   useEffect(() => {
-    // Update the label and thumbnail based on data updates
     if (data.thumbnail) {
       setThumbnail(data.thumbnail);
     }
@@ -38,34 +37,35 @@ const MapNodeEdit = ({ id, data }) => {
   return (
     <div
       style={{
-        padding: "10px",
-        backgroundColor: "#f9f9f9",
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        width: "150px",
+        display: "flex",
+        alignItems: "center",
+        padding: "8px",
+        backgroundColor: "#2D2D2D",
+        border: "1px solid #444",
+        borderRadius: "12px",
+        width: "200px",
         fontFamily: "Barlow, sans-serif",
-        textAlign: "center",
+        color: "#FFFFFF",
         position: "relative",
       }}
     >
-      <strong
-        style={{
-          display: "block",
-          marginBottom: "5px",
-          fontSize: "14px",
-        }}
-      >
-        {label}
-      </strong>
       <div
         style={{
-          width: "80px",
-          height: "80px",
-          margin: "0 auto",
-          marginBottom: "5px",
+          flex: 1,
+          textAlign: "left",
+          fontSize: "14px",
+          paddingLeft: "8px",
+        }}
+      >
+        <strong>{label}</strong>
+      </div>
+      <div
+        style={{
+          width: "50px",
+          height: "50px",
           borderRadius: "8px",
           overflow: "hidden",
-          backgroundColor: "#f0f0f0",
+          backgroundColor: "#555",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
@@ -88,7 +88,7 @@ const MapNodeEdit = ({ id, data }) => {
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: "#40E0D0", borderRadius: "0%" }}
+        style={{ background: "#40E0D0", borderRadius: "50%" }}
       />
     </div>
   );

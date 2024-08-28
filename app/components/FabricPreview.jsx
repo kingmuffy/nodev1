@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Leva, useControls } from "leva";
 import {
   TextureLoader,
   SRGBColorSpace,
@@ -10,54 +9,92 @@ import {
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
+import { GUI } from "lil-gui";
 
 const FabricPreview = () => {
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
-
-  const ab = materialParams.metalness;
-  console.log(ab);
+  const guiRef = useRef(null); // Ref for GUI container
 
   const modelPath = "/FabricTexture.fbx";
 
-  useControls({
-    bumpScale: {
-      value: materialParams.bumpScale,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("bumpScale", value),
-    },
-    displacementScale: {
-      value: materialParams.displacementScale,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("displacementScale", value),
-    },
-    emissiveIntensity: {
-      value: materialParams.emissiveIntensity,
-      min: 0,
-      max: 5,
-      step: 0.1,
-      onChange: (value) => updateMaterialParams("emissiveIntensity", value),
-    },
-    metalness: {
-      value: materialParams.metalness,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("metalness", value),
-    },
-    roughness: {
-      value: materialParams.roughness,
-      min: 0,
-      max: 1,
-      step: 0.01,
-      onChange: (value) => updateMaterialParams("roughness", value),
-    },
-  });
+  useEffect(() => {
+    const guiContainer = guiRef.current;
+    const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
+
+    // Ensure all properties exist in materialParams with default values
+    const defaultMaterialParams = {
+      bumpScale: 0,
+      displacementScale: 0,
+      emissiveIntensity: 0,
+      metalness: 0,
+      roughness: 0,
+      displacementBias: 0,
+      flatShading: false,
+      aoMapIntensity: 0,
+      clearcoat: 0,
+    };
+
+    const params = { ...defaultMaterialParams, ...materialParams };
+
+    // Setup the GUI controls
+    gui
+      .add(params, "bumpScale", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("bumpScale", value));
+
+    gui
+      .add(params, "displacementScale", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("displacementScale", value));
+
+    gui
+      .add(params, "emissiveIntensity", 0, 5)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("emissiveIntensity", value));
+
+    gui
+      .add(params, "metalness", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("metalness", value));
+
+    gui
+      .add(params, "roughness", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("roughness", value));
+
+    // New controls
+    gui
+      .add(params, "displacementBias", -1, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("displacementBias", value));
+
+    gui
+      .add(params, "flatShading")
+      .onChange((value) => updateMaterialParams("flatShading", value));
+
+    gui
+      .add(params, "aoMapIntensity", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("aoMapIntensity", value));
+
+    gui
+      .add(params, "clearcoat", 0, 1)
+      .step(0.01)
+      .onChange((value) => updateMaterialParams("clearcoat", value));
+
+    // Prevent scroll wheel from affecting other elements
+    gui.domElement.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    });
+
+    return () => {
+      gui.destroy();
+    };
+  }, [materialParams, updateMaterialParams]);
 
   // Load the model when the component mounts
   useEffect(() => {
@@ -178,7 +215,11 @@ const FabricPreview = () => {
         {currentModel && <primitive object={currentModel} />}
         <OrbitControls />
       </Canvas>
-      <Leva collapsed />
+      {/* GUI container */}
+      <div
+        ref={guiRef}
+        style={{ position: "absolute", top: 0, right: 0, zIndex: 1000 }}
+      ></div>
     </>
   );
 };
