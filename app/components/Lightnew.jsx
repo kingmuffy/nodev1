@@ -1,8 +1,4 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react/prop-types */
-/* eslint-disable react/no-unknown-property */
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
 import { useControls, folder } from "leva";
@@ -49,40 +45,6 @@ const Lightnew = () => {
     pointIntensity,
     pointCastShadow,
     pointPosition,
-    DSB,
-    DLSB,
-    DRSB,
-    SSB1,
-    SSB2,
-    SSB3,
-    SSB4,
-    SSB5,
-    PSB,
-    DSM,
-    DLSM,
-    DRSM,
-    SSM1,
-    SSM2,
-    SSM3,
-    SSM4,
-    SSM5,
-    PSM,
-    CameraNearS1,
-    CameraFarS1,
-    CameraNearS2,
-    CameraFarS2,
-    CameraNearS3,
-    CameraFarS3,
-    CameraNearS4,
-    CameraFarS4,
-    CameraNearS5,
-    CameraFarS5,
-    shadowCameraFar,
-    shadowCameraNear,
-    shadowCameraLeft,
-    shadowCameraRight,
-    shadowCameraTop,
-    shadowCameraBottom,
   } = useControls({
     "Ambient Light": folder({
       ambientOn: true,
@@ -97,82 +59,54 @@ const Lightnew = () => {
       dirIntensity: { value: 2, min: 0, max: 10, step: 0.1 },
       dirCastShadow: true,
       dirPosition: { value: [2, 10, 21], step: 1 },
-      DSB: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      DSM: { value: 2048, min: 512, max: 4096, step: 512 },
     }),
     "Directional Light Left": folder({
       dirOnLeft: true,
       dirIntensityLeft: { value: 1.5, min: 0, max: 10, step: 0.1 },
       dirLeftCastShadow: true,
       dirPositionLeft: { value: [-12, 4, 15], step: 1 },
-      DLSB: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      DLMB: { value: 2048, min: 512, max: 4096, step: 512 },
     }),
     "Directional Light Right": folder({
       dirOnRight: true,
       dirIntensityRight: { value: 1.5, min: 0, max: 10, step: 0.1 },
       dirRightCastShadow: true,
       dirPositionRight: { value: [10, 15, 0], step: 1 },
-      DRSB: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      DRSM: { value: 2048, min: 512, max: 4096, step: 512 },
     }),
     "Spot Light 1": folder({
       spotOn1: true,
       spotIntensity1: { value: 1, min: 0, max: 10, step: 0.1 },
       spot1CastShadow: true,
       spotPosition1: { value: [3, 2, 3], step: 1 },
-      SSB1: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      SSM1: { value: 2048, min: 512, max: 4096, step: 512 },
-      CameraNearS1: { value: 1, min: 0.1, max: 50, step: 0.1 },
-      CameraFarS1: { value: 10, min: 0.1, max: 100, step: 0.1 },
     }),
     "Spot Light 2": folder({
       spotOn2: true,
       spotIntensity2: { value: 1, min: 0, max: 10, step: 0.1 },
       spot2CastShadow: true,
       spotPosition2: { value: [-3, 2, 3], step: 1 },
-      SSB2: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      SSM2: { value: 2048, min: 512, max: 4096, step: 512 },
-      CameraNearS2: { value: 1, min: 0.1, max: 50, step: 0.1 },
-      CameraFarS2: { value: 10, min: 0.1, max: 100, step: 0.1 },
     }),
     "Spot Light 3": folder({
       spotOn3: true,
       spotIntensity3: { value: 1, min: 0, max: 10, step: 0.1 },
       spot3CastShadow: true,
       spotPosition3: { value: [3, 2, 3], step: 1 },
-      SSB3: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      SSM3: { value: 2048, min: 512, max: 4096, step: 512 },
-      CameraNearS3: { value: 1, min: 0.1, max: 50, step: 0.1 },
-      CameraFarS3: { value: 10, min: 0.1, max: 100, step: 0.1 },
     }),
     "Spot Light 4": folder({
       spotOn4: true,
       spotIntensity4: { value: 1, min: 0, max: 10, step: 0.1 },
       spot4CastShadow: true,
       spotPosition4: { value: [-6, 2, 3], step: 1 },
-      SSB4: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      SSM4: { value: 2048, min: 512, max: 4096, step: 512 },
-      CameraNearS4: { value: 1, min: 0.1, max: 50, step: 0.1 },
-      CameraFarS4: { value: 10, min: 0.1, max: 100, step: 0.1 },
     }),
     "Spot Light 5": folder({
       spotOn5: true,
       spotIntensity5: { value: 1, min: 0, max: 10, step: 0.1 },
       spot5CastShadow: true,
       spotPosition5: { value: [6, 2, 3], step: 1 },
-      SSB5: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      SSM5: { value: 2048, min: 512, max: 4096, step: 512 },
-      CameraNearS5: { value: 1, min: 0.1, max: 50, step: 0.1 },
-      CameraFarS5: { value: 10, min: 0.1, max: 100, step: 0.1 },
     }),
     "Point Light": folder({
       pointOn: true,
       pointIntensity: { value: 1, min: 0, max: 10, step: 0.1 },
       pointCastShadow: true,
       pointPosition: { value: [25, 5, -5], step: 1 },
-      PSB: { value: -0.002, min: -0.006, max: 0.1, step: 0.001 },
-      PSM: { value: 2048, min: 512, max: 4096, step: 512 },
     }),
   });
 
@@ -186,15 +120,59 @@ const Lightnew = () => {
   const spotLightRef5 = useRef();
   const pointLightRef = useRef();
 
-  useHelper(dirLightRef, THREE.DirectionalLightHelper, 1);
-  useHelper(dirLightLeftRef, THREE.DirectionalLightHelper, 1);
-  useHelper(dirLightRightRef, THREE.DirectionalLightHelper, 1);
-  useHelper(spotLightRef1, THREE.SpotLightHelper);
-  useHelper(spotLightRef2, THREE.SpotLightHelper);
-  useHelper(spotLightRef3, THREE.SpotLightHelper);
-  useHelper(spotLightRef4, THREE.SpotLightHelper);
-  useHelper(spotLightRef5, THREE.SpotLightHelper);
-  useHelper(pointLightRef, THREE.PointLightHelper, 1);
+  useEffect(() => {
+    if (dirOn) {
+      useHelper(dirLightRef, THREE.DirectionalLightHelper, 1);
+    }
+  }, [dirOn]);
+
+  useEffect(() => {
+    if (dirOnLeft) {
+      useHelper(dirLightLeftRef, THREE.DirectionalLightHelper, 1);
+    }
+  }, [dirOnLeft]);
+
+  useEffect(() => {
+    if (dirOnRight) {
+      useHelper(dirLightRightRef, THREE.DirectionalLightHelper, 1);
+    }
+  }, [dirOnRight]);
+
+  useEffect(() => {
+    if (spotOn1) {
+      useHelper(spotLightRef1, THREE.SpotLightHelper);
+    }
+  }, [spotOn1]);
+
+  useEffect(() => {
+    if (spotOn2) {
+      useHelper(spotLightRef2, THREE.SpotLightHelper);
+    }
+  }, [spotOn2]);
+
+  useEffect(() => {
+    if (spotOn3) {
+      useHelper(spotLightRef3, THREE.SpotLightHelper);
+    }
+  }, [spotOn3]);
+
+  useEffect(() => {
+    if (spotOn4) {
+      useHelper(spotLightRef4, THREE.SpotLightHelper);
+    }
+  }, [spotOn4]);
+
+  useEffect(() => {
+    if (spotOn5) {
+      useHelper(spotLightRef5, THREE.SpotLightHelper);
+    }
+  }, [spotOn5]);
+
+  useEffect(() => {
+    if (pointOn) {
+      useHelper(pointLightRef, THREE.PointLightHelper, 1);
+    }
+  }, [pointOn]);
 
   return (
     <>
