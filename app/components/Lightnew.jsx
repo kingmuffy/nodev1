@@ -22,10 +22,12 @@ const Lightnew = () => {
     spotIntensity1,
     spotPosition1,
     spotAngle1,
+    spotDecay1,
     spotOn2,
     spotIntensity2,
     spotPosition2,
     spotAngle2,
+    spotDecay2,
   } = useControls({
     "Hemisphere Light": folder({
       hemiOn: true,
@@ -53,12 +55,14 @@ const Lightnew = () => {
       spotIntensity1: { value: 1, min: 0, max: 10, step: 0.1 },
       spotPosition1: { value: [5, 10, 5], step: 1 },
       spotAngle1: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
+      spotDecay1: { value: 2, min: 0, max: 5, step: 0.1 },
     }),
     "Spot Light 2": folder({
       spotOn2: true,
       spotIntensity2: { value: 1, min: 0, max: 10, step: 0.1 },
       spotPosition2: { value: [-5, 10, -5], step: 1 },
       spotAngle2: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
+      spotDecay2: { value: 2, min: 0, max: 5, step: 0.1 },
     }),
   });
 
@@ -100,15 +104,17 @@ const Lightnew = () => {
     if (spotLightRef1.current) {
       spotLightRef1.current.position.set(...spotPosition1);
       spotLightRef1.current.angle = spotAngle1;
+      spotLightRef1.current.decay = spotDecay1; // Set decay for Spot Light 1
     }
-  }, [spotPosition1, spotAngle1]);
+  }, [spotPosition1, spotAngle1, spotDecay1]);
 
   useEffect(() => {
     if (spotLightRef2.current) {
       spotLightRef2.current.position.set(...spotPosition2);
       spotLightRef2.current.angle = spotAngle2;
+      spotLightRef2.current.decay = spotDecay2; // Set decay for Spot Light 2
     }
-  }, [spotPosition2, spotAngle2]);
+  }, [spotPosition2, spotAngle2, spotDecay2]);
 
   return (
     <>
@@ -150,6 +156,7 @@ const Lightnew = () => {
           intensity={spotIntensity1}
           position={spotPosition1}
           angle={spotAngle1}
+          decay={spotDecay1} // Decay for Spot Light 1
           castShadow
         />
       )}
@@ -159,6 +166,7 @@ const Lightnew = () => {
           intensity={spotIntensity2}
           position={spotPosition2}
           angle={spotAngle2}
+          decay={spotDecay2} // Decay for Spot Light 2
           castShadow
         />
       )}
