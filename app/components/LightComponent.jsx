@@ -3,75 +3,83 @@ import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
 import { useControls } from "leva";
 
-// Custom hooks for each type of light
-const useAmbientLightControls = (light) => {
-  return useControls(`${light.type} Controls`, {
-    intensity: { value: light.intensity || 1, min: 0, max: 10 },
-  });
-};
+const useLightControls = (light) => {
+  switch (light.type) {
+    case "Ambient Light 1":
+    case "Ambient Light 2":
+    case "Ambient Light 3":
+    case "Ambient Light 4":
+      return useControls(`${light.type} Controls`, {
+        intensity: { value: light.intensity || 1, min: 0, max: 10 },
+      });
 
-const useHemisphereLightControls = (light) => {
-  return useControls(`${light.type} Controls`, {
-    intensity: { value: light.intensity || 1, min: 0, max: 10 },
-  });
-};
+    case "Hemisphere Light 1":
+    case "Hemisphere Light 2":
+    case "Hemisphere Light 3":
+    case "Hemisphere Light 4":
+      return useControls(`${light.type} Controls`, {
+        intensity: { value: light.intensity || 1, min: 0, max: 10 },
+        position: {
+          value: light.position || [0, 5, 5],
+          min: -10,
+          max: 10,
+          step: 0.1,
+        },
+      });
 
-const useDirectionalLightControls = (light) => {
-  return useControls(`${light.type} Controls`, {
-    intensity: { value: light.intensity || 1, min: 0, max: 10 },
-    position: {
-      value: light.position || [0, 5, 5],
-      min: -10,
-      max: 10,
-      step: 0.1,
-    },
-  });
-};
+    case "Directional Light 1":
+    case "Directional Light 2":
+    case "Directional Light 3":
+    case "Directional Light 4":
+      return useControls(`${light.type} Controls`, {
+        intensity: { value: light.intensity || 1, min: 0, max: 10 },
+        position: {
+          value: light.position || [0, 5, 5],
+          min: -10,
+          max: 10,
+          step: 0.1,
+        },
+      });
 
-const usePointLightControls = (light) => {
-  return useControls(`${light.type} Controls`, {
-    intensity: { value: light.intensity || 1, min: 0, max: 10 },
-    position: {
-      value: light.position || [5, 5, 5],
-      min: -10,
-      max: 10,
-      step: 0.1,
-    },
-  });
-};
+    case "Point Light 1":
+    case "Point Light 2":
+    case "Point Light 3":
+    case "Point Light 4":
+      return useControls(`${light.type} Controls`, {
+        intensity: { value: light.intensity || 1, min: 0, max: 10 },
+        position: {
+          value: light.position || [5, 5, 5],
+          min: -10,
+          max: 10,
+          step: 0.1,
+        },
+      });
 
-const useSpotLightControls = (light) => {
-  return useControls(`${light.type} Controls`, {
-    intensity: { value: light.intensity || 1, min: 0, max: 10 },
-    position: {
-      value: light.position || [5, 5, 5],
-      min: -10,
-      max: 10,
-      step: 0.1,
-    },
-    angle: { value: light.angle || Math.PI / 6, min: 0, max: Math.PI / 2 },
-    decay: { value: light.decay || 2, min: 0, max: 2 },
-  });
+    case "Spot Light 1":
+    case "Spot Light 2":
+    case "Spot Light 3":
+    case "Spot Light 4":
+      return useControls(`${light.type} Controls`, {
+        intensity: { value: light.intensity || 1, min: 0, max: 10 },
+        position: {
+          value: light.position || [5, 5, 5],
+          min: -10,
+          max: 10,
+          step: 0.1,
+        },
+        angle: { value: light.angle || Math.PI / 6, min: 0, max: Math.PI / 2 },
+        decay: { value: light.decay || 2, min: 0, max: 2 },
+      });
+
+    default:
+      return {};
+  }
 };
 
 const LightComponent = ({ light, onUpdate }) => {
   const lightRef = useRef();
 
-  // Set controls based on the light type
-  let controls;
-  if (light?.type.includes("Ambient Light")) {
-    controls = useAmbientLightControls(light);
-  } else if (light?.type.includes("Hemisphere Light")) {
-    controls = useHemisphereLightControls(light);
-  } else if (light?.type.includes("Directional Light")) {
-    controls = useDirectionalLightControls(light);
-  } else if (light?.type.includes("Point Light")) {
-    controls = usePointLightControls(light);
-  } else if (light?.type.includes("Spot Light")) {
-    controls = useSpotLightControls(light);
-  } else {
-    controls = {}; // Default to an empty object if the light type is unknown
-  }
+  const controls = useLightControls(light);
 
   useHelper(
     lightRef,
@@ -121,7 +129,6 @@ const LightComponent = ({ light, onUpdate }) => {
     return null;
   }
 
-  // Render the appropriate light component
   switch (light.type) {
     case "Ambient Light 1":
     case "Ambient Light 2":
