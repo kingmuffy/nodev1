@@ -21,7 +21,7 @@ const FabricEditPreview = ({ parameters }) => {
 
   useEffect(() => {
     const guiContainer = guiRef.current;
-    const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
+    const gui = new GUI({ container: guiContainer });
 
     const params = {
       bumpScale: parameters.bumpScale || 0,

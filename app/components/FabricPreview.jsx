@@ -16,13 +16,23 @@ import LightNew from "./Lightnew";
 import { LightContext } from "../LightContext";
 
 const FabricPreview = () => {
-  const { lights, addLight, deleteLight, setLights } = useContext(LightContext);
+  const { lights, setLights } = useContext(LightContext);
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
   const guiRef = useRef(null);
 
   const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
+
+  const updateLight = (lightToUpdate, updatedProperties) => {
+    setLights((prevLights) =>
+      prevLights.map((light) =>
+        light.id === lightToUpdate.id
+          ? { ...light, ...updatedProperties }
+          : light
+      )
+    );
+  };
 
   useEffect(() => {
     const guiContainer = guiRef.current;
@@ -42,49 +52,77 @@ const FabricPreview = () => {
 
     const params = { ...defaultMaterialParams, ...materialParams };
 
+    const updateModelAndContext = (paramName, value) => {
+      if (currentModel) {
+        currentModel.traverse((child) => {
+          if (child.isMesh) {
+            child.material[paramName] = value;
+            child.material.needsUpdate = true;
+          }
+        });
+      }
+      updateMaterialParams(paramName, value);
+    };
+
     gui
       .add(params, "bumpScale", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("bumpScale", value));
+      .onChange((value) => {
+        updateModelAndContext("bumpScale", value);
+      });
 
     gui
       .add(params, "displacementScale", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("displacementScale", value));
+      .onChange((value) => {
+        updateModelAndContext("displacementScale", value);
+      });
 
     gui
       .add(params, "emissiveIntensity", 0, 5)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("emissiveIntensity", value));
+      .onChange((value) => {
+        updateModelAndContext("emissiveIntensity", value);
+      });
 
     gui
       .add(params, "metalness", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("metalness", value));
+      .onChange((value) => {
+        updateModelAndContext("metalness", value);
+      });
 
     gui
       .add(params, "roughness", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("roughness", value));
+      .onChange((value) => {
+        updateModelAndContext("roughness", value);
+      });
 
     gui
       .add(params, "displacementBias", -1, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("displacementBias", value));
+      .onChange((value) => {
+        updateModelAndContext("displacementBias", value);
+      });
 
-    gui
-      .add(params, "flatShading")
-      .onChange((value) => updateMaterialParams("flatShading", value));
+    gui.add(params, "flatShading").onChange((value) => {
+      updateModelAndContext("flatShading", value);
+    });
 
     gui
       .add(params, "aoMapIntensity", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("aoMapIntensity", value));
+      .onChange((value) => {
+        updateModelAndContext("aoMapIntensity", value);
+      });
 
     gui
       .add(params, "clearcoat", 0, 1)
       .step(0.01)
-      .onChange((value) => updateMaterialParams("clearcoat", value));
+      .onChange((value) => {
+        updateModelAndContext("clearcoat", value);
+      });
 
     gui.domElement.addEventListener("wheel", (event) => {
       event.preventDefault();
@@ -95,7 +133,7 @@ const FabricPreview = () => {
     return () => {
       gui.destroy();
     };
-  }, [materialParams, updateMaterialParams]);
+  }, [materialParams, updateMaterialParams, currentModel]);
 
   useEffect(() => {
     const loadModel = async () => {
@@ -121,16 +159,6 @@ const FabricPreview = () => {
 
     loadModel();
   }, [modelPath]);
-
-  const updateLight = (lightToUpdate, updatedProperties) => {
-    setLights((prevLights) =>
-      prevLights.map((light) =>
-        light.id === lightToUpdate.id
-          ? { ...light, ...updatedProperties }
-          : light
-      )
-    );
-  };
 
   useEffect(() => {
     const applyMaterial = () => {
@@ -234,5 +262,5 @@ const FabricPreview = () => {
     </>
   );
 };
-// failed to compile
+
 export default FabricPreview;
