@@ -1,90 +1,53 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect } from "react";
 import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
 import { useControls } from "leva";
 
+const useAmbientLightControls = (light) => {
+  return useControls(light.type, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
+    color: { value: light.color || "#ffffff" },
+  });
+};
+
+const useHemisphereLightControls = (light) => {
+  return useControls(light.type, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
+    skyColor: { value: light.skyColor || "#ffffff" },
+    groundColor: { value: light.groundColor || "#444444" },
+  });
+};
+
+const useDirectionalPointSpotLightControls = (light) => {
+  return useControls(light.type, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
+    color: { value: light.color || "#ffffff" },
+    position: {
+      value: light.position || [0, 5, 5],
+      min: -10,
+      max: 10,
+      step: 0.1,
+    },
+    angle: { value: light.angle || Math.PI / 6, min: 0, max: Math.PI / 2 },
+    decay: { value: light.decay || 2, min: 0, max: 2 },
+  });
+};
+
 const LightComponent = ({ light, onUpdate }) => {
   const lightRef = useRef();
 
-  // Default control configuration for different types of lights
-  const ambientControls = {
-    intensity: { value: 1, min: 0, max: 10 },
-    color: { value: "#ffffff" },
-  };
-
-  const hemisphereControls = {
-    intensity: { value: 1, min: 0, max: 10 },
-    skyColor: { value: "#ffffff" },
-    groundColor: { value: "#444444" },
-  };
-
-  const directionalPointSpotControls = {
-    intensity: { value: 1, min: 0, max: 10 },
-    color: { value: "#ffffff" },
-    position: { value: [0, 5, 5], min: -10, max: 10, step: 0.1 },
-    angle: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
-    decay: { value: 2, min: 0, max: 2 },
-  };
-
-  // Memoized controls based on the light type to prevent unnecessary re-renders
-  const controls = useMemo(() => {
-    if (!light?.type) return {};
-
-    if (light.type.includes("Ambient Light")) {
-      return useControls(light.type, {
-        intensity: {
-          ...ambientControls.intensity,
-          value: light.intensity || 1,
-        },
-        color: { ...ambientControls.color, value: light.color || "#ffffff" },
-      });
-    } else if (light.type.includes("Hemisphere Light")) {
-      return useControls(light.type, {
-        intensity: {
-          ...hemisphereControls.intensity,
-          value: light.intensity || 1,
-        },
-        skyColor: {
-          ...hemisphereControls.skyColor,
-          value: light.skyColor || "#ffffff",
-        },
-        groundColor: {
-          ...hemisphereControls.groundColor,
-          value: light.groundColor || "#444444",
-        },
-      });
-    } else if (
-      light.type.includes("Directional Light") ||
-      light.type.includes("Point Light") ||
-      light.type.includes("Spot Light")
-    ) {
-      return useControls(light.type, {
-        intensity: {
-          ...directionalPointSpotControls.intensity,
-          value: light.intensity || 1,
-        },
-        color: {
-          ...directionalPointSpotControls.color,
-          value: light.color || "#ffffff",
-        },
-        position: {
-          ...directionalPointSpotControls.position,
-          value: light.position || [0, 5, 5],
-        },
-        ...(light.type.includes("Spot Light") && {
-          angle: {
-            ...directionalPointSpotControls.angle,
-            value: light.angle || Math.PI / 6,
-          },
-          decay: {
-            ...directionalPointSpotControls.decay,
-            value: light.decay || 2,
-          },
-        }),
-      });
-    }
-    return {};
-  }, [light]);
+  let controls = {};
+  if (light?.type.includes("Ambient Light")) {
+    controls = useAmbientLightControls(light);
+  } else if (light?.type.includes("Hemisphere Light")) {
+    controls = useHemisphereLightControls(light);
+  } else if (
+    light?.type.includes("Directional Light") ||
+    light?.type.includes("Point Light") ||
+    light?.type.includes("Spot Light")
+  ) {
+    controls = useDirectionalPointSpotLightControls(light);
+  }
 
   useHelper(
     lightRef,
