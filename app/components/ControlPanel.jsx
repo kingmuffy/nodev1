@@ -11,6 +11,7 @@ import "reactflow/dist/style.css";
 import MainNode from "./MainNode";
 import MapNode from "./MapNode";
 import { MapContext } from "../MapContext";
+import { LightContext } from "../LightContext";
 import {
   Snackbar,
   Alert,
@@ -56,6 +57,8 @@ const edgeOptions = {
 };
 
 const ControlPanel = () => {
+  const { lights, addLight, deleteLight, selectedLight, setSelectedLight } =
+    useContext(LightContext);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { connectedMaps, materialParams, updateConnectedMaps } =
@@ -264,7 +267,6 @@ const ControlPanel = () => {
             <Background />
           </ReactFlow>
         </div>
-        {/* Reposition the control panel to the bottom right */}
         <div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
           <TextField
             label="Fabric Name"
@@ -290,6 +292,43 @@ const ControlPanel = () => {
               borderRadius: "4px",
             }}
           />
+          <select
+            onChange={(e) => setSelectedLight(e.target.value)}
+            value={selectedLight}
+            style={{ marginBottom: "10px", width: "100%", color: "black" }}
+          >
+            <option value="Ambient Light">Ambient Light</option>
+            <option value="Hemisphere Light">Hemisphere Light</option>
+            <option value="Directional Light">Directional Light</option>
+            <option value="Point Light">Point Light</option>
+            <option value="Spot Light">Spot Light</option>
+          </select>
+          <Button
+            onClick={addLight}
+            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            sx={{ marginBottom: "10px" }}
+          >
+            Add Light
+          </Button>
+          {lights.length > 0 ? (
+            <div>
+              <h4>Lights:</h4>
+              {lights.map((light, index) => (
+                <div key={index} style={{ marginBottom: "10px" }}>
+                  <span>{light.type}</span>
+                  <Button
+                    onClick={() => deleteLight(light)}
+                    className="p-1 bg-red-500 text-white rounded hover:bg-red-700"
+                    sx={{ marginLeft: "10px" }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No lights added yet.</p>
+          )}
           <Button
             onClick={addNode}
             className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"

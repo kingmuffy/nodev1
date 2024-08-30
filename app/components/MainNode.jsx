@@ -22,11 +22,11 @@ const MainNode = ({ data }) => (
   <div
     style={{
       padding: "12px 15px",
-      backgroundColor: "#f5f5f5", // Light background
-      border: "1px solid #ddd", // Lighter border for a subtle definition
-      borderRadius: "12px", // Rounded corners for a modern look
-      width: "280px", // Slightly wider for comfort
-      color: "#333", // Darker text for contrast
+      backgroundColor: "#f5f5f5",
+      border: "1px solid #ddd",
+      borderRadius: "12px",
+      width: "280px",
+      color: "#333",
       fontFamily: "Barlow, sans-serif",
       position: "relative",
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", // Soft shadow for depth
@@ -62,7 +62,7 @@ const MainNode = ({ data }) => (
               fontSize: "13px",
               display: "flex",
               alignItems: "center",
-              color: "#333", // Darker color for map names
+              color: "#333",
             }}
           >
             {map}
@@ -71,7 +71,7 @@ const MainNode = ({ data }) => (
                 style={{
                   marginLeft: "5px",
                   fontSize: "14px",
-                  color: "#888", // Lighter color for icons to make them less intrusive
+                  color: "#888",
                   cursor: "pointer",
                 }}
               />

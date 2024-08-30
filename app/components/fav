@@ -23,7 +23,6 @@ const FabricPreview = () => {
     const guiContainer = guiRef.current;
     const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
 
-    // Ensure all properties exist in materialParams with default values
     const defaultMaterialParams = {
       bumpScale: 0,
       displacementScale: 0,
@@ -38,7 +37,6 @@ const FabricPreview = () => {
 
     const params = { ...defaultMaterialParams, ...materialParams };
 
-    // Setup the GUI controls
     gui
       .add(params, "bumpScale", 0, 1)
       .step(0.01)
@@ -64,7 +62,6 @@ const FabricPreview = () => {
       .step(0.01)
       .onChange((value) => updateMaterialParams("roughness", value));
 
-    // New controls
     gui
       .add(params, "displacementBias", -1, 1)
       .step(0.01)
@@ -84,7 +81,6 @@ const FabricPreview = () => {
       .step(0.01)
       .onChange((value) => updateMaterialParams("clearcoat", value));
 
-    // Prevent scroll wheel from affecting other elements
     gui.domElement.addEventListener("wheel", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -96,7 +92,6 @@ const FabricPreview = () => {
     };
   }, [materialParams, updateMaterialParams]);
 
-  // Load the model when the component mounts
   useEffect(() => {
     const loadModel = async () => {
       if (currentModel) {
@@ -122,7 +117,6 @@ const FabricPreview = () => {
     loadModel();
   }, [modelPath]);
 
-  // Apply textures when nodes are connected or files are uploaded
   useEffect(() => {
     const applyMaterial = () => {
       if (currentModel && Object.keys(connectedMaps).length > 0) {

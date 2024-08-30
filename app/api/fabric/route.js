@@ -41,7 +41,6 @@ export async function POST(request) {
     const formData = await request.formData();
     console.log("Form Data received:", formData);
 
-    // Prepare object to store S3 URLs, material parameters, and fabric details
     const fabricData = {
       diffuseMapUrl: null,
       reflectionMapUrl: null,
@@ -70,7 +69,6 @@ export async function POST(request) {
 
     console.log("Initial fabric data:", fabricData);
 
-    // List of map types to upload
     const mapTypes = [
       "diffuseMapUrl",
       "reflectionMapUrl",
@@ -86,7 +84,6 @@ export async function POST(request) {
       "roughnessMapUrl",
     ];
 
-    // Loop through each map type and upload to S3 if file exists
     for (const mapType of mapTypes) {
       const file = formData.get(mapType);
       if (file && file.size > 0) {
@@ -104,7 +101,6 @@ export async function POST(request) {
 
     console.log("Final fabric data before saving to DB:", fabricData);
 
-    // Save fabric data to the database
     const savedFabric = await prisma.fabricMap.create({
       data: fabricData,
     });

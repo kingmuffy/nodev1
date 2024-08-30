@@ -33,7 +33,7 @@ const ReactFlowComponent = ({ onNodeConnect }) => {
   const onConnect = useCallback(
     (params) => {
       setEdges((eds) => addEdge(params, eds));
-      onNodeConnect(params); // Trigger on connect
+      onNodeConnect(params);
     },
     [setEdges, onNodeConnect]
   );

@@ -1,29 +1,31 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, { useEffect, useContext, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { GridHelper } from "three";
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+import * as THREE from "three";
 import {
   TextureLoader,
   SRGBColorSpace,
   MeshPhysicalMaterial,
   DoubleSide,
 } from "three";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
-import Lightnew from "./Lightnew"; // Importing the Lightnew component
+import LightNew from "./LightNew";
+import { LightContext } from "../LightContext";
 
 const FabricPreview = () => {
+  const { lights, addLight, deleteLight, setLights } = useContext(LightContext);
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
-  const guiRef = useRef(null); // Ref for GUI container
+  const guiRef = useRef(null);
 
   const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
 
   useEffect(() => {
     const guiContainer = guiRef.current;
-    const gui = new GUI({ container: guiContainer }); // Render GUI in the specific container
+    const gui = new GUI({ container: guiContainer });
 
     const defaultMaterialParams = {
       bumpScale: 0,
@@ -119,6 +121,16 @@ const FabricPreview = () => {
     loadModel();
   }, [modelPath]);
 
+  const updateLight = (lightToUpdate, updatedProperties) => {
+    setLights((prevLights) =>
+      prevLights.map((light) =>
+        light.id === lightToUpdate.id
+          ? { ...light, ...updatedProperties }
+          : light
+      )
+    );
+  };
+
   useEffect(() => {
     const applyMaterial = () => {
       if (currentModel && Object.keys(connectedMaps).length > 0) {
@@ -147,6 +159,8 @@ const FabricPreview = () => {
               if (file) {
                 loader.load(URL.createObjectURL(file), (texture) => {
                   texture.colorSpace = SRGBColorSpace;
+                  texture.wrapS = THREE.RepeatWrapping;
+                  texture.wrapT = THREE.RepeatWrapping;
                   texture.needsUpdate = true;
 
                   switch (mapType) {
@@ -206,15 +220,12 @@ const FabricPreview = () => {
   return (
     <>
       <Canvas style={{ backgroundColor: "#808080" }}>
-        {" "}
-        {/* Setting the background color to grey */}
-        <Lightnew /> {/* Adding the Lightnew component */}
+        <LightNew lights={lights} onUpdate={updateLight} />
         {currentModel && <primitive object={currentModel} />}
-        <gridHelper args={[100, 100, "#ffffff", "#555555"]} />{" "}
-        {/* Adding Grid Helper */}
+        <gridHelper args={[100, 100, "#ffffff", "#555555"]} />
         <OrbitControls />
       </Canvas>
-      {/* GUI container */}
+
       <div
         ref={guiRef}
         style={{ position: "absolute", top: 0, right: 0, zIndex: 1000 }}

@@ -5,7 +5,6 @@ export const MapContext = createContext();
 export const MapProvider = ({ children, initialMaterialParams }) => {
   const [connectedMaps, setConnectedMaps] = useState({});
 
-  // Initialize materialParams with initial values passed from props
   const [materialParams, setMaterialParams] = useState({
     bumpScale: initialMaterialParams?.bumpScale || 0.0,
     displacementScale: initialMaterialParams?.displacementScale || 0.0,
