@@ -6,6 +6,7 @@ import { useControls } from "leva";
 const LightComponent = ({ light, onUpdate }) => {
   const lightRef = useRef();
 
+  // Handle the case where light or light.type is undefined
   if (!light || !light.type) {
     console.error("Light or light type is undefined");
     return null;
@@ -13,6 +14,7 @@ const LightComponent = ({ light, onUpdate }) => {
 
   let controls = {};
 
+  // Define controls based on the type of light
   if (light.type.includes("Ambient Light")) {
     controls = useControls(light.type, {
       intensity: {
@@ -73,6 +75,7 @@ const LightComponent = ({ light, onUpdate }) => {
     });
   }
 
+  // Apply helpers conditionally
   useHelper(
     lightRef,
     light.type.includes("Hemisphere Light")
@@ -124,6 +127,7 @@ const LightComponent = ({ light, onUpdate }) => {
     controls.groundColor,
   ]);
 
+  // Render the appropriate light component
   switch (light.type) {
     case "Ambient Light 1":
     case "Ambient Light 2":
