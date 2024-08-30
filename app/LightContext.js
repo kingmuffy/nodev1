@@ -10,59 +10,31 @@ export const LightProvider = ({ children }) => {
   const addLight = () => {
     const defaultProperties = {
       "Ambient Light": [
-        {
-          id: uuidv4(),
-          type: "Ambient Light 1",
-          intensity: 1,
-          color: "#ffffff",
-        },
-        {
-          id: uuidv4(),
-          type: "Ambient Light 2",
-          intensity: 1,
-          color: "#ffffff",
-        },
-        {
-          id: uuidv4(),
-          type: "Ambient Light 3",
-          intensity: 1,
-          color: "#ffffff",
-        },
-        {
-          id: uuidv4(),
-          type: "Ambient Light 4",
-          intensity: 1,
-          color: "#ffffff",
-        },
+        { id: uuidv4(), type: "Ambient Light 1", intensity: 1 },
+        { id: uuidv4(), type: "Ambient Light 2", intensity: 1 },
+        { id: uuidv4(), type: "Ambient Light 3", intensity: 1 },
+        { id: uuidv4(), type: "Ambient Light 4", intensity: 1 },
       ],
       "Hemisphere Light": [
         {
           id: uuidv4(),
           type: "Hemisphere Light 1",
           intensity: 1,
-          skyColor: "#ffffff",
-          groundColor: "#444444",
         },
         {
           id: uuidv4(),
           type: "Hemisphere Light 2",
           intensity: 1,
-          skyColor: "#ffffff",
-          groundColor: "#444444",
         },
         {
           id: uuidv4(),
           type: "Hemisphere Light 3",
           intensity: 1,
-          skyColor: "#ffffff",
-          groundColor: "#444444",
         },
         {
           id: uuidv4(),
           type: "Hemisphere Light 4",
           intensity: 1,
-          skyColor: "#ffffff",
-          groundColor: "#444444",
         },
       ],
       "Directional Light": [
@@ -71,28 +43,24 @@ export const LightProvider = ({ children }) => {
           type: "Directional Light 1",
           intensity: 1,
           position: [0, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Directional Light 2",
           intensity: 1,
           position: [0, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Directional Light 3",
           intensity: 1,
           position: [0, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Directional Light 4",
           intensity: 1,
           position: [0, 5, 5],
-          color: "#ffffff",
         },
       ],
       "Point Light": [
@@ -101,28 +69,24 @@ export const LightProvider = ({ children }) => {
           type: "Point Light 1",
           intensity: 1,
           position: [5, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Point Light 2",
           intensity: 1,
           position: [5, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Point Light 3",
           intensity: 1,
           position: [5, 5, 5],
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
           type: "Point Light 4",
           intensity: 1,
           position: [5, 5, 5],
-          color: "#ffffff",
         },
       ],
       "Spot Light": [
@@ -133,7 +97,6 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
@@ -142,7 +105,6 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
@@ -151,7 +113,6 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
-          color: "#ffffff",
         },
         {
           id: uuidv4(),
@@ -160,7 +121,6 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
-          color: "#ffffff",
         },
       ],
     };
