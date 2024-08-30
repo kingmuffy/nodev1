@@ -3,15 +3,16 @@ import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
 import { useControls } from "leva";
 
+// Custom hooks for each type of light
 const useAmbientLightControls = (light) => {
-  return useControls(light.type, {
+  return useControls(`${light.type} Controls`, {
     intensity: { value: light.intensity || 1, min: 0, max: 10 },
     color: { value: light.color || "#ffffff" },
   });
 };
 
 const useHemisphereLightControls = (light) => {
-  return useControls(light.type, {
+  return useControls(`${light.type} Controls`, {
     intensity: { value: light.intensity || 1, min: 0, max: 10 },
     skyColor: { value: light.skyColor || "#ffffff" },
     groundColor: { value: light.groundColor || "#444444" },
@@ -19,7 +20,7 @@ const useHemisphereLightControls = (light) => {
 };
 
 const useDirectionalPointSpotLightControls = (light) => {
-  return useControls(light.type, {
+  return useControls(`${light.type} Controls`, {
     intensity: { value: light.intensity || 1, min: 0, max: 10 },
     color: { value: light.color || "#ffffff" },
     position: {
@@ -36,17 +37,24 @@ const useDirectionalPointSpotLightControls = (light) => {
 const LightComponent = ({ light, onUpdate }) => {
   const lightRef = useRef();
 
+  // Call all hooks unconditionally
+  const ambientLightControls = useAmbientLightControls(light);
+  const hemisphereLightControls = useHemisphereLightControls(light);
+  const directionalPointSpotLightControls =
+    useDirectionalPointSpotLightControls(light);
+
+  // Determine the controls to use based on light type
   let controls = {};
   if (light?.type.includes("Ambient Light")) {
-    controls = useAmbientLightControls(light);
+    controls = ambientLightControls;
   } else if (light?.type.includes("Hemisphere Light")) {
-    controls = useHemisphereLightControls(light);
+    controls = hemisphereLightControls;
   } else if (
     light?.type.includes("Directional Light") ||
     light?.type.includes("Point Light") ||
     light?.type.includes("Spot Light")
   ) {
-    controls = useDirectionalPointSpotLightControls(light);
+    controls = directionalPointSpotLightControls;
   }
 
   useHelper(
