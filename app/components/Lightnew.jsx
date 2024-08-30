@@ -4,13 +4,9 @@ import LightComponent from "./LightComponent";
 const LightNew = ({ lights, onUpdate }) => {
   return (
     <>
-      {lights.length > 0 ? (
-        lights.map((light, index) => (
-          <LightComponent key={index} light={light} onUpdate={onUpdate} />
-        ))
-      ) : (
-        <div>No lights added yet.</div>
-      )}
+      {lights.map((light) => (
+        <LightComponent key={light.id} light={light} onUpdate={onUpdate} />
+      ))}
     </>
   );
 };
