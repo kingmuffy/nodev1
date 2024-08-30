@@ -12,6 +12,8 @@ import {
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
 import LightNew from "./Lightnew";
+// import LightNew from "./Lightnew";
+
 import { LightContext } from "../LightContext";
 
 const FabricPreview = () => {
