@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
 import { useControls } from "leva";
@@ -6,85 +6,95 @@ import { useControls } from "leva";
 const LightComponent = ({ light, onUpdate }) => {
   const lightRef = useRef();
 
-  // Handle the case where light or light.type is undefined
-  if (!light || !light.type) {
-    console.error("Light or light type is undefined");
-    return null;
-  }
+  // Default control configuration for different types of lights
+  const ambientControls = {
+    intensity: { value: 1, min: 0, max: 10 },
+    color: { value: "#ffffff" },
+  };
 
-  let controls = {};
+  const hemisphereControls = {
+    intensity: { value: 1, min: 0, max: 10 },
+    skyColor: { value: "#ffffff" },
+    groundColor: { value: "#444444" },
+  };
 
-  // Define controls based on the type of light
-  if (light.type.includes("Ambient Light")) {
-    controls = useControls(light.type, {
-      intensity: {
-        value: light.intensity || 1,
-        min: 0,
-        max: 10,
-      },
-      color: {
-        value: light.color || "#ffffff",
-      },
-    });
-  } else if (light.type.includes("Hemisphere Light")) {
-    controls = useControls(light.type, {
-      intensity: {
-        value: light.intensity || 1,
-        min: 0,
-        max: 10,
-      },
-      skyColor: {
-        value: light.skyColor || "#ffffff",
-      },
-      groundColor: {
-        value: light.groundColor || "#444444",
-      },
-    });
-  } else if (
-    light.type.includes("Directional Light") ||
-    light.type.includes("Point Light") ||
-    light.type.includes("Spot Light")
-  ) {
-    controls = useControls(light.type, {
-      intensity: {
-        value: light.intensity || 1,
-        min: 0,
-        max: 10,
-      },
-      color: {
-        value: light.color || "#ffffff",
-      },
-      position: {
-        value: light.position || [0, 5, 5],
-        min: -10,
-        max: 10,
-        step: 0.1,
-      },
-      ...(light.type.includes("Spot Light") && {
-        angle: {
-          value: light.angle || Math.PI / 6,
-          min: 0,
-          max: Math.PI / 2,
+  const directionalPointSpotControls = {
+    intensity: { value: 1, min: 0, max: 10 },
+    color: { value: "#ffffff" },
+    position: { value: [0, 5, 5], min: -10, max: 10, step: 0.1 },
+    angle: { value: Math.PI / 6, min: 0, max: Math.PI / 2 },
+    decay: { value: 2, min: 0, max: 2 },
+  };
+
+  // Memoized controls based on the light type to prevent unnecessary re-renders
+  const controls = useMemo(() => {
+    if (!light?.type) return {};
+
+    if (light.type.includes("Ambient Light")) {
+      return useControls(light.type, {
+        intensity: {
+          ...ambientControls.intensity,
+          value: light.intensity || 1,
         },
-        decay: {
-          value: light.decay || 2,
-          min: 0,
-          max: 2,
+        color: { ...ambientControls.color, value: light.color || "#ffffff" },
+      });
+    } else if (light.type.includes("Hemisphere Light")) {
+      return useControls(light.type, {
+        intensity: {
+          ...hemisphereControls.intensity,
+          value: light.intensity || 1,
         },
-      }),
-    });
-  }
+        skyColor: {
+          ...hemisphereControls.skyColor,
+          value: light.skyColor || "#ffffff",
+        },
+        groundColor: {
+          ...hemisphereControls.groundColor,
+          value: light.groundColor || "#444444",
+        },
+      });
+    } else if (
+      light.type.includes("Directional Light") ||
+      light.type.includes("Point Light") ||
+      light.type.includes("Spot Light")
+    ) {
+      return useControls(light.type, {
+        intensity: {
+          ...directionalPointSpotControls.intensity,
+          value: light.intensity || 1,
+        },
+        color: {
+          ...directionalPointSpotControls.color,
+          value: light.color || "#ffffff",
+        },
+        position: {
+          ...directionalPointSpotControls.position,
+          value: light.position || [0, 5, 5],
+        },
+        ...(light.type.includes("Spot Light") && {
+          angle: {
+            ...directionalPointSpotControls.angle,
+            value: light.angle || Math.PI / 6,
+          },
+          decay: {
+            ...directionalPointSpotControls.decay,
+            value: light.decay || 2,
+          },
+        }),
+      });
+    }
+    return {};
+  }, [light]);
 
-  // Apply helpers conditionally
   useHelper(
     lightRef,
-    light.type.includes("Hemisphere Light")
+    light?.type.includes("Hemisphere Light")
       ? THREE.HemisphereLightHelper
-      : light.type.includes("Directional Light")
+      : light?.type.includes("Directional Light")
       ? THREE.DirectionalLightHelper
-      : light.type.includes("Point Light")
+      : light?.type.includes("Point Light")
       ? THREE.PointLightHelper
-      : light.type.includes("Spot Light")
+      : light?.type.includes("Spot Light")
       ? THREE.SpotLightHelper
       : null,
     1,
@@ -96,13 +106,13 @@ const LightComponent = ({ light, onUpdate }) => {
       const pos = controls.position || [0, 0, 0];
 
       if (
-        light.type.includes("Directional Light") ||
-        light.type.includes("Point Light") ||
-        light.type.includes("Spot Light")
+        light?.type.includes("Directional Light") ||
+        light?.type.includes("Point Light") ||
+        light?.type.includes("Spot Light")
       ) {
         lightRef.current.position.set(...pos);
       }
-      if (light.type.includes("Spot Light")) {
+      if (light?.type.includes("Spot Light")) {
         lightRef.current.angle = controls.angle || Math.PI / 6;
         lightRef.current.decay = controls.decay || 2;
       }
@@ -110,7 +120,7 @@ const LightComponent = ({ light, onUpdate }) => {
       lightRef.current.intensity = controls.intensity;
       lightRef.current.color = new THREE.Color(controls.color);
 
-      if (light.type.includes("Hemisphere Light")) {
+      if (light?.type.includes("Hemisphere Light")) {
         lightRef.current.skyColor = new THREE.Color(controls.skyColor);
         lightRef.current.groundColor = new THREE.Color(controls.groundColor);
       }
@@ -125,7 +135,14 @@ const LightComponent = ({ light, onUpdate }) => {
     controls.color,
     controls.skyColor,
     controls.groundColor,
+    light,
+    onUpdate,
   ]);
+
+  if (!light || !light.type) {
+    console.error("Light or light type is undefined");
+    return null;
+  }
 
   // Render the appropriate light component
   switch (light.type) {
