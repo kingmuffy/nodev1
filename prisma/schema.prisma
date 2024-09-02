@@ -15,7 +15,6 @@ model Folderimport {
   status          String?       @default("active")
   createdAt       DateTime      @default(now())
   fbxs            Fbxa[]
-  lightSettings   LightSettings?
 }
 
 model Fbxa {
@@ -26,40 +25,55 @@ model Fbxa {
   folderimport    Folderimport  @relation(fields: [folderId], references: [id])
 }
 
-model LightSettings {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  folderId        String        @unique @db.ObjectId
-  lightOn         Boolean
-  lightIntensity  Float
-  lightPosition   String 
-  lightCastShadow Boolean
-  folder          Folderimport  @relation(fields: [folderId], references: [id])
+
+
+model Project {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  lightSettings LightSettings[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
+
+model LightSettings {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  lightType   String
+  intensity   Float
+  position    Json
+  angle       Float?
+  decay       Float?
+  castShadow  Boolean
+  projectId   String   @map("projectId") @db.ObjectId
+  project     Project  @relation(fields: [projectId], references: [id])
+}
+
+
+
 
 model FabricMap {
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
-  diffuseMapUrl         String?  // URL to Diffuse map in S3
-  reflectionMapUrl      String?  // URL to Reflection map in S3
-  refractionMapUrl      String?  // URL to Refraction map in S3
-  bumpMapUrl            String?  // URL to Bump map in S3
-  normalMapUrl          String?  // URL to Normal map in S3
-  displacementMapUrl    String?  // URL to Displacement map in S3
-  specularMapUrl        String?  // URL to Specular map in S3
-  emissiveMapUrl        String?  // URL to Emissive map in S3
-  opacityMapUrl         String?  // URL to Opacity map in S3
-  aoMapUrl              String?  // URL to Ambient Occlusion map in S3
-  metalnessMapUrl       String?  // URL to Metalness map in S3
-  roughnessMapUrl       String?  // URL to Roughness map in S3
-  bumpScale             Float?   // Bump scale parameter
-  displacementScale     Float?   // Displacement scale parameter
-  emissiveIntensity     Float?   // Emissive intensity parameter
-  metalness             Float?   // Metalness parameter
-  roughness             Float?   // Roughness parameter
-  displacementBias      Float?   // The offset of the displacement map's values on the mesh's vertices
-  flatShading           Boolean? // Whether the material is rendered with flat shading
-  aoMapIntensity        Float?   // The intensity of the ambient occlusion map
-  clearcoat             Float?   // The intensity of the clear coat layer
-  fabricName            String?  // Name of the fabric
-  fabricColor           String?  // Color of the fabric
+  diffuseMapUrl         String?  
+  reflectionMapUrl      String?  
+  refractionMapUrl      String?  
+  bumpMapUrl            String?  
+  normalMapUrl          String?  
+  displacementMapUrl    String?  
+  specularMapUrl        String?  
+  emissiveMapUrl        String?  
+  opacityMapUrl         String?  
+  aoMapUrl              String?  
+  metalnessMapUrl       String?  
+  roughnessMapUrl       String?  
+  bumpScale             Float?   
+  displacementScale     Float?   
+  emissiveIntensity     Float?   
+  metalness             Float?   
+  roughness             Float?   
+  displacementBias      Float?   
+  flatShading           Boolean? 
+  aoMapIntensity        Float?   
+  clearcoat             Float?  
+  fabricName            String?  
+  fabricColor           String?  
   createdAt             DateTime @default(now())
 }

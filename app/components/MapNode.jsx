@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { Handle, Position } from "reactflow";
-import ImageIcon from "@mui/icons-material/Image"; // Importing an icon from MUI Icons
+import ImageIcon from "@mui/icons-material/Image";
 
 const MapNode = ({ id, data }) => {
   const fileInputRef = useRef(null);
@@ -31,7 +31,7 @@ const MapNode = ({ id, data }) => {
         borderRadius: "8px",
         padding: "5px 10px",
         fontFamily: "Barlow, sans-serif",
-        width: "200px", // Adjusted width for better label-thumbnail spacing
+        width: "200px",
         position: "relative",
       }}
     >
@@ -41,7 +41,7 @@ const MapNode = ({ id, data }) => {
           textAlign: "left",
           fontSize: "14px",
           paddingRight: "10px",
-          whiteSpace: "nowrap", // Prevent label from wrapping
+          whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}

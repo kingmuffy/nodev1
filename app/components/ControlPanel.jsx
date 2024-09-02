@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useContext } from "react";
+import React, { useCallback, useState, useContext, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -18,7 +18,18 @@ import {
   Button,
   TextField,
   CircularProgress,
+  Menu,
+  MenuItem,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import axios from "axios";
 
 const mapNames = [
@@ -57,8 +68,14 @@ const edgeOptions = {
 };
 
 const ControlPanel = () => {
-  const { lights, addLight, deleteLight, selectedLight, setSelectedLight } =
-    useContext(LightContext);
+  const {
+    lights,
+    addLight,
+    deleteLight,
+    setLights,
+    selectedLight,
+    setSelectedLight,
+  } = useContext(LightContext);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { connectedMaps, materialParams, updateConnectedMaps } =
@@ -70,6 +87,21 @@ const ControlPanel = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [projectName, setProjectName] = useState("");
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [loadProjectDialogOpen, setLoadProjectDialogOpen] = useState(false);
+  const [projects, setProjects] = useState([]); // Store list of saved projects
+
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const updateNodeData = useCallback(
     (nodeId, file, thumbnail, label) => {
@@ -212,6 +244,117 @@ const ControlPanel = () => {
     setNodes((nds) => nds.concat(newNode));
   }, [nodes, setNodes, updateNodeData]);
 
+  const openProjectDialog = () => {
+    setProjectDialogOpen(true);
+  };
+
+  const closeProjectDialog = () => {
+    setProjectDialogOpen(false);
+  };
+
+  const openLoadProjectDialog = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/projects");
+      if (response.data.status === "success") {
+        setProjects(response.data.projects);
+        setLoadProjectDialogOpen(true);
+      } else {
+        setSnackbarMessage("Failed to load projects.");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      setSnackbarMessage("Error loading projects.");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeLoadProjectDialog = () => {
+    setLoadProjectDialogOpen(false);
+  };
+  const loadProject = async (projectId) => {
+    try {
+      setLoading(true);
+
+      // Make the API call to fetch the project by ID
+      const response = await axios.get(`/api/project/${projectId}`);
+
+      if (response.data.status === "success") {
+        // Clear existing lights
+        setLights([]);
+
+        // Handle potential null values in the loaded light settings
+        const loadedLights = response.data.project.lightSettings.map(
+          (light) => ({
+            ...light,
+            angle: light.angle ?? 0, // Default to 0 if null
+            decay: light.decay ?? 1, // Default to 1 if null
+          })
+        );
+
+        // Set the new lights from the project
+        setLights(loadedLights);
+        setSnackbarMessage("Light settings loaded successfully!");
+      } else {
+        setSnackbarMessage("Failed to load light settings.");
+      }
+    } catch (error) {
+      console.error("Error loading light settings:", error);
+      setSnackbarMessage("Error loading light settings.");
+    } finally {
+      setLoading(false);
+      closeLoadProjectDialog(); // Close the dialog after loading
+    }
+  };
+
+  const saveLightSettings = async () => {
+    setLoading(true);
+    try {
+      const lightSettings = lights.map((light) => {
+        const baseSettings = {
+          lightType: light.type,
+          intensity: light.intensity,
+          castShadow: light.castShadow ?? true,
+        };
+
+        if (light.position) {
+          baseSettings.position = JSON.stringify(light.position);
+        }
+
+        if (light.angle !== undefined) {
+          baseSettings.angle = light.angle;
+        }
+
+        if (light.decay !== undefined) {
+          baseSettings.decay = light.decay;
+        }
+
+        return baseSettings;
+      });
+
+      const response = await axios.post("/api/lights", {
+        projectName,
+        lightSettings,
+      });
+
+      if (response.data.status === "success") {
+        setSnackbarMessage("Light settings saved successfully!");
+      } else {
+        setSnackbarMessage("Failed to save light settings.");
+      }
+    } catch (error) {
+      console.error("Error saving light settings:", error);
+      setSnackbarMessage("Error saving light settings.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+      closeProjectDialog(); // Close the project name dialog
+    }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -261,7 +404,7 @@ const ControlPanel = () => {
             onNodeContextMenu={onNodeContextMenu}
             nodeTypes={nodeTypes}
             fitView
-            defaultEdgeOptions={edgeOptions} // Use defaultEdgeOptions for edge styles
+            defaultEdgeOptions={edgeOptions}
           >
             <Controls />
             <Background />
@@ -303,13 +446,24 @@ const ControlPanel = () => {
             <option value="Point Light">Point Light</option>
             <option value="Spot Light">Spot Light</option>
           </select>
-          <Button
-            onClick={addLight}
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            sx={{ marginBottom: "10px" }}
-          >
-            Add Light
-          </Button>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <Button
+              onClick={addLight}
+              className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+              sx={{ marginBottom: "10px", marginRight: "8px" }}
+            >
+              Add Light
+            </Button>
+            <IconButton
+              aria-label="more"
+              aria-controls="long-menu"
+              aria-haspopup="true"
+              onClick={handleMenuClick}
+              sx={{ color: "white", marginBottom: "10px" }}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          </div>
           {lights.length > 0 ? (
             <div>
               <h4>Lights:</h4>
@@ -343,6 +497,18 @@ const ControlPanel = () => {
           >
             {loading ? <CircularProgress size={20} color="inherit" /> : "SAVE"}
           </Button>
+          <Menu
+            id="long-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={openProjectDialog}>Save Light Settings</MenuItem>
+            <MenuItem onClick={openLoadProjectDialog}>
+              Load Light Settings
+            </MenuItem>
+          </Menu>
         </div>
       </ReactFlowProvider>
 
@@ -359,6 +525,55 @@ const ControlPanel = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      <Dialog open={projectDialogOpen} onClose={closeProjectDialog}>
+        <DialogTitle>Enter Light Name</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Project Name"
+            type="text"
+            fullWidth
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeProjectDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={saveLightSettings}
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={loadProjectDialogOpen} onClose={closeLoadProjectDialog}>
+        <DialogTitle>Select a Project to Load</DialogTitle>
+        <DialogContent>
+          <List>
+            {projects.map((project) => (
+              <ListItem
+                button
+                onClick={() => loadProject(project.id)}
+                key={project.id}
+              >
+                <ListItemText primary={project.name} />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeLoadProjectDialog} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {confirmDelete && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

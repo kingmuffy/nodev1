@@ -12,26 +12,48 @@ import {
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
 import LightNew from "./Lightnew";
-
 import { LightContext } from "../LightContext";
+import axios from "axios";
 
 const FabricPreview = () => {
-  const { lights, setLights } = useContext(LightContext);
+  const { lights, updateLight } = useContext(LightContext);
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
   const guiRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
 
-  const updateLight = (lightToUpdate, updatedProperties) => {
-    setLights((prevLights) =>
-      prevLights.map((light) =>
-        light.id === lightToUpdate.id
-          ? { ...light, ...updatedProperties }
-          : light
-      )
-    );
+  const saveLightSettings = async () => {
+    setLoading(true);
+    try {
+      const lightSettings = lights.map((light) => ({
+        lightType: light.type,
+        intensity: light.intensity,
+        position: JSON.stringify(light.position || [0, 0, 0]),
+        angle: light.angle ?? null,
+        decay: light.decay ?? null,
+        castShadow: light.castShadow ?? true,
+      }));
+
+      console.log("lightSettings payload:", lightSettings);
+
+      const response = await axios.post("/api/lights", { lightSettings });
+
+      if (response.data.status === "success") {
+        setSnackbarMessage("Light settings saved successfully!");
+      } else {
+        setSnackbarMessage("Failed to save light settings.");
+      }
+    } catch (error) {
+      console.error("Error saving light settings:", error);
+      setSnackbarMessage("Error saving light settings.");
+    } finally {
+      setLoading(false);
+      // handle snackbar logic
+    }
   };
 
   useEffect(() => {

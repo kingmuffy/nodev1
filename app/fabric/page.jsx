@@ -14,13 +14,13 @@ export default function Page() {
           sizes={[50, 50]}
           minSize={200}
           direction="horizontal"
+          gutterSize={4}
         >
           <div className="flex justify-center items-center bg-gray-900">
             <FabricPreview />
           </div>
           <div className="flex flex-col h-full">
             <ControlPanel />
-            <div></div>
           </div>
         </Split>
       </MapProvider>
