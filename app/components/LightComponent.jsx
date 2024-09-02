@@ -4,22 +4,22 @@ import * as THREE from "three";
 import { useControls } from "leva";
 
 const useAmbientLightControls = (light) => {
-  return useControls(`${light?.type || "Unknown"} Controls`, {
-    intensity: { value: light?.intensity || 1, min: 0, max: 10 },
+  return useControls(`${light.type} Controls`, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
   });
 };
 
 const useHemisphereLightControls = (light) => {
-  return useControls(`${light?.type || "Unknown"} Controls`, {
-    intensity: { value: light?.intensity || 1, min: 0, max: 10 },
+  return useControls(`${light.type} Controls`, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
   });
 };
 
 const useDirectionalLightControls = (light) => {
-  return useControls(`${light?.type || "Unknown"} Controls`, {
-    intensity: { value: light?.intensity || 1, min: 0, max: 10 },
+  return useControls(`${light.type} Controls`, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
     position: {
-      value: light?.position || [0, 5, 5],
+      value: light.position || [0, 5, 5],
       min: -10,
       max: 10,
       step: 0.1,
@@ -28,10 +28,10 @@ const useDirectionalLightControls = (light) => {
 };
 
 const usePointLightControls = (light) => {
-  return useControls(`${light?.type || "Unknown"} Controls`, {
-    intensity: { value: light?.intensity || 1, min: 0, max: 10 },
+  return useControls(`${light.type} Controls`, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
     position: {
-      value: light?.position || [5, 5, 5],
+      value: light.position || [5, 5, 5],
       min: -10,
       max: 10,
       step: 0.1,
@@ -40,34 +40,30 @@ const usePointLightControls = (light) => {
 };
 
 const useSpotLightControls = (light) => {
-  return useControls(`${light?.type || "Unknown"} Controls`, {
-    intensity: { value: light?.intensity || 1, min: 0, max: 10 },
+  return useControls(`${light.type} Controls`, {
+    intensity: { value: light.intensity || 1, min: 0, max: 10 },
     position: {
-      value: light?.position || [5, 5, 5],
+      value: light.position || [5, 5, 5],
       min: -10,
       max: 10,
       step: 0.1,
     },
-    angle: { value: light?.angle || Math.PI / 6, min: 0, max: Math.PI / 2 },
-    decay: { value: light?.decay || 2, min: 0, max: 2 },
+    angle: { value: light.angle || Math.PI / 6, min: 0, max: Math.PI / 2 },
+    decay: { value: light.decay || 2, min: 0, max: 2 },
   });
 };
 
 const LightComponent = ({ light, updateLightContext }) => {
   const lightRef = useRef();
 
-  if (!light || !light.type) {
-    console.error("Light or light type is undefined");
-    return null;
-  }
-
+  // Use hooks unconditionally
   const ambientLightControls = useAmbientLightControls(light);
   const hemisphereLightControls = useHemisphereLightControls(light);
   const directionalLightControls = useDirectionalLightControls(light);
   const pointLightControls = usePointLightControls(light);
   const spotLightControls = useSpotLightControls(light);
 
-  let controls = {};
+  let controls;
   let applicableProps = {};
 
   if (light.type.includes("Ambient Light")) {
@@ -114,7 +110,7 @@ const LightComponent = ({ light, updateLightContext }) => {
 
   useEffect(() => {
     if (lightRef.current) {
-      const pos = controls.position || [0, 0, 0];
+      const pos = controls?.position || [0, 0, 0];
 
       if (
         light.type.includes("Directional Light") ||
@@ -130,7 +126,6 @@ const LightComponent = ({ light, updateLightContext }) => {
 
       lightRef.current.intensity = controls.intensity;
 
-      // Up context Ji
       if (updateLightContext) {
         updateLightContext(light.id, {
           ...light,
