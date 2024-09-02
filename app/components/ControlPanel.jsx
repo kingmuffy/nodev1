@@ -20,7 +20,6 @@ import {
   CircularProgress,
   Menu,
   MenuItem,
-  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -29,7 +28,6 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import axios from "axios";
 
 const mapNames = [
@@ -279,23 +277,19 @@ const ControlPanel = () => {
     try {
       setLoading(true);
 
-      // Make the API call to fetch the project by ID
       const response = await axios.get(`/api/project/${projectId}`);
 
       if (response.data.status === "success") {
-        // Clear existing lights
         setLights([]);
 
-        // Handle potential null values in the loaded light settings
         const loadedLights = response.data.project.lightSettings.map(
           (light) => ({
             ...light,
-            angle: light.angle ?? 0, // Default to 0 if null
-            decay: light.decay ?? 1, // Default to 1 if null
+            angle: light.angle ?? 0,
+            decay: light.decay ?? 1,
           })
         );
 
-        // Set the new lights from the project
         setLights(loadedLights);
         setSnackbarMessage("Light settings loaded successfully!");
       } else {
@@ -306,7 +300,7 @@ const ControlPanel = () => {
       setSnackbarMessage("Error loading light settings.");
     } finally {
       setLoading(false);
-      closeLoadProjectDialog(); // Close the dialog after loading
+      closeLoadProjectDialog();
     }
   };
 
@@ -454,15 +448,15 @@ const ControlPanel = () => {
             >
               Add Light
             </Button>
-            <IconButton
-              aria-label="more"
+            <Button
               aria-controls="long-menu"
               aria-haspopup="true"
               onClick={handleMenuClick}
               sx={{ color: "white", marginBottom: "10px" }}
+              variant="contained"
             >
-              <MoreVertIcon />
-            </IconButton>
+              Light Options
+            </Button>
           </div>
           {lights.length > 0 ? (
             <div>
@@ -552,27 +546,49 @@ const ControlPanel = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog open={loadProjectDialogOpen} onClose={closeLoadProjectDialog}>
-        <DialogTitle>Select a Project to Load</DialogTitle>
-        <DialogContent>
-          <List>
-            {projects.map((project) => (
-              <ListItem
-                button
-                onClick={() => loadProject(project.id)}
-                key={project.id}
-              >
-                <ListItemText primary={project.name} />
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeLoadProjectDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
+      <Dialog
+        open={loadProjectDialogOpen}
+        onClose={closeLoadProjectDialog}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      >
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-lg">
+          <DialogTitle className="text-xl font-semibold text-gray-800 px-6 py-4 border-b border-gray-200">
+            Select a Project to Load
+          </DialogTitle>
+          <DialogContent className="px-6 py-4">
+            <List className="space-y-2">
+              {projects.map((project) => (
+                <ListItem
+                  component="button"
+                  onClick={() => loadProject(project.id)}
+                  key={project.id}
+                  className="px-4 py-2 rounded-lg hover:bg-blue-100 focus:bg-blue-100 focus:outline-none transition-colors"
+                >
+                  <ListItemText
+                    primary={
+                      <>
+                        <span className="font-medium">{project.name}</span>
+                        <span className="text-gray-500 text-sm">
+                          {" "}
+                          — {new Date(project.createdAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    }
+                    className="text-gray-700 text-sm"
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions className="px-6 py-4 border-t border-gray-200">
+            <Button
+              onClick={closeLoadProjectDialog}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-700 transition-colors"
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </div>
       </Dialog>
 
       {confirmDelete && (

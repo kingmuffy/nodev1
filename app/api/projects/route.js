@@ -8,6 +8,7 @@ export async function GET(req) {
       select: {
         id: true,
         name: true,
+        createdAt: true,
       },
     });
     return new Response(JSON.stringify({ status: "success", projects }), {
