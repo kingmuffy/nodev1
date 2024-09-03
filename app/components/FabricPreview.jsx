@@ -11,7 +11,7 @@ import {
 } from "three";
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
-import LightNew from "./LightNew";
+import LightNew from "./Lightnew";
 import { LightContext } from "../LightContext";
 import axios from "axios";
 
