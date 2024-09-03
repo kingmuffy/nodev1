@@ -311,7 +311,7 @@ const ControlPanel = () => {
         const baseSettings = {
           lightType: light.type,
           intensity: light.intensity,
-          castShadow: light.castShadow ?? true,
+          // castShadow: light.castShadow ?? true,
         };
 
         if (light.position) {

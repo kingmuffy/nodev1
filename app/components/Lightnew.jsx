@@ -20,6 +20,7 @@ const LightNew = ({ lights = [], onUpdate }) => {
           const mappedLight = {
             ...light,
             type: light.lightType,
+            // castShadow: true,
           };
 
           const filteredLight = Object.fromEntries(

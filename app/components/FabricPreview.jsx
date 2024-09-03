@@ -11,15 +11,15 @@ import {
 } from "three";
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
-import LightNew from "./Lightnew";
+import LightNew from "./LightNew";
 import { LightContext } from "../LightContext";
 import axios from "axios";
 
 const FabricPreview = () => {
   const { lights, updateLight } = useContext(LightContext);
-  const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
+  const [currentModel, setCurrentModel] = useState(null);
   const guiRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -255,11 +255,17 @@ const FabricPreview = () => {
                       break;
                   }
 
-                  child.material = new MeshPhysicalMaterial(materialConfig);
+                  child.material = new MeshPhysicalMaterial({
+                    ...materialConfig,
+                    shadowSide: DoubleSide, // Ensure shadows are visible on both sides
+                  });
                   child.material.needsUpdate = true;
                 });
               }
             });
+
+            child.castShadow = true;
+            child.receiveShadow = true;
           }
         });
       }
@@ -270,7 +276,11 @@ const FabricPreview = () => {
 
   return (
     <>
-      <Canvas style={{ backgroundColor: "#808080" }}>
+      <Canvas
+        shadows
+        camera={{ position: [0, 5, 10], fov: 50 }}
+        style={{ backgroundColor: "#808080" }}
+      >
         <LightNew lights={lights} onUpdate={updateLight} />
         {currentModel && <primitive object={currentModel} />}
         <gridHelper args={[100, 100, "#ffffff", "#555555"]} />
