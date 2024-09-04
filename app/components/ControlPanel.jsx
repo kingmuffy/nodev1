@@ -355,7 +355,7 @@ const ControlPanel = () => {
       if (response.data.status === "success") {
         setSnackbarMessage("Light set as default successfully!");
       } else {
-        setSnackbarMessage("Failed to set project as default.");
+        setSnackbarMessage("Failed to set Light as default.");
       }
     } catch (error) {
       console.error("Error setting default project:", error);
