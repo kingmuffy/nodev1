@@ -7,7 +7,6 @@ export const LightProvider = ({ children }) => {
   const [selectedLight, setSelectedLight] = useState("Ambient Light");
   const [lights, setLights] = useState([]);
 
-  // Function to add a new light
   const addLight = () => {
     const defaultProperties = {
       "Ambient Light": [
@@ -228,12 +227,10 @@ export const LightProvider = ({ children }) => {
     }
   };
 
-  // Function to delete a light
   const deleteLight = (lightToDelete) => {
     setLights(lights.filter((light) => light.id !== lightToDelete.id));
   };
 
-  // Function to update light properties
   const updateLight = (id, updatedProperties) => {
     setLights((prevLights) =>
       prevLights.map((light) =>
@@ -242,7 +239,6 @@ export const LightProvider = ({ children }) => {
     );
   };
 
-  // Function to reset lights when loading a new project
   const resetLights = (newLights) => {
     setLights(newLights);
   };
@@ -257,7 +253,7 @@ export const LightProvider = ({ children }) => {
         addLight,
         deleteLight,
         updateLight,
-        resetLights, // Added to reset lights when loading a new project
+        resetLights,
       }}
     >
       {children}

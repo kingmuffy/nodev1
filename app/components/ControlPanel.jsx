@@ -285,7 +285,6 @@ const ControlPanel = () => {
       const response = await axios.get(`/api/project/${projectId}`);
 
       if (response.data.status === "success") {
-        // Reset Leva controls by resetting the light state before loading new lights
         setLights([]);
         resetLights();
 
@@ -294,7 +293,7 @@ const ControlPanel = () => {
             ...light,
             angle: light.angle ?? 0,
             decay: light.decay ?? 1,
-            id: uuidv4(), // Generate new IDs if needed
+            id: uuidv4(),
           })
         );
 
