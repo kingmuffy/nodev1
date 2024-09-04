@@ -8,6 +8,7 @@ import ReactFlow, {
   ReactFlowProvider,
 } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
+import { Checkbox, ListItemIcon } from "@mui/material";
 
 import "reactflow/dist/style.css";
 import MainNode from "./MainNode";
@@ -164,7 +165,38 @@ const ControlPanel = () => {
     },
     [setEdges, nodes, setNodes, updateConnectedMaps]
   );
+  const loadDefaultLightSettings = async () => {
+    try {
+      setLoading(true);
 
+      const response = await axios.get("/api/projects/default");
+
+      if (response.data.status === "success") {
+        resetLights();
+
+        const loadedLights = response.data.project.lightSettings.map(
+          (light) => ({
+            ...light,
+            id: uuidv4(),
+          })
+        );
+
+        setLights(loadedLights);
+        setSnackbarMessage("Default light settings loaded successfully!");
+      } else {
+        setSnackbarMessage("Failed to load default light settings.");
+      }
+    } catch (error) {
+      console.error("Error loading default light settings:", error);
+      setSnackbarMessage("Error loading default light settings.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+  };
+  useEffect(() => {
+    loadDefaultLightSettings();
+  }, []);
   const onEdgeDoubleClick = useCallback(
     (event, edge) => {
       event.stopPropagation();
@@ -258,6 +290,7 @@ const ControlPanel = () => {
     try {
       setLoading(true);
       const response = await axios.get("/api/projects");
+
       if (response.data.status === "success") {
         setProjects(response.data.projects);
         setLoadProjectDialogOpen(true);
@@ -309,6 +342,33 @@ const ControlPanel = () => {
       setLoading(false);
       closeLoadProjectDialog();
     }
+  };
+
+  // Function to set a project as default
+  const setDefaultProject = async (projectId) => {
+    try {
+      setLoading(true);
+      const response = await axios.put(`/api/projects/set-default`, {
+        projectId,
+      });
+
+      if (response.data.status === "success") {
+        setSnackbarMessage("Project set as default successfully!");
+      } else {
+        setSnackbarMessage("Failed to set project as default.");
+      }
+    } catch (error) {
+      console.error("Error setting default project:", error);
+      setSnackbarMessage("Error setting default project.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle checkbox change
+  const handleCheckboxChange = (projectId) => {
+    setDefaultProject(projectId);
   };
 
   const saveLightSettings = async () => {
@@ -581,7 +641,29 @@ const ControlPanel = () => {
                         </span>
                       </>
                     }
-                    className="text-gray-700 text-sm"
+                    secondary={
+                      <div className="flex items-center">
+                        <ListItemIcon>
+                          <Checkbox
+                            checked={project.isDefault}
+                            onChange={() => handleCheckboxChange(project.id)}
+                            color="primary"
+                            inputProps={{
+                              "aria-label": "Default status checkbox",
+                            }}
+                          />
+                        </ListItemIcon>
+                        <span
+                          className={`text-sm ml-2 ${
+                            project.isDefault
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {project.isDefault ? "Default" : "Not Default"}
+                        </span>
+                      </div>
+                    }
                   />
                 </ListItem>
               ))}

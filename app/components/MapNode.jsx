@@ -50,7 +50,7 @@ const MapNode = ({ id, data }) => {
       </strong>
       <div
         style={{
-          width: "50px", // Smaller thumbnail size for a sleek look
+          width: "50px",
           height: "50px",
           borderRadius: "8px",
           overflow: "hidden",

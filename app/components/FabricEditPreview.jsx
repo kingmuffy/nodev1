@@ -144,7 +144,6 @@ const FabricEditPreview = ({ parameters }) => {
     loadModel();
   }, [modelPath]);
 
-  // Apply textures when nodes are connected or files are uploaded
   useEffect(() => {
     const applyMaterial = () => {
       if (currentModel) {

@@ -6,7 +6,7 @@ import { useControls, folder } from "leva";
 const LightComponent = ({ light, updateLightContext }) => {
   const lightRef = useRef();
 
-  const simplifiedKey = `${light.type} - ${light.id.slice(0, 8)}`; // Use only the first 8 characters of the UUID
+  const simplifiedKey = `${light.type} - ${light.id.slice(0, 8)}`;
 
   const controls = useControls(simplifiedKey, {
     intensity: { value: light.intensity || 1, min: 0, max: 10 },

@@ -9,6 +9,7 @@ export async function GET(req) {
         id: true,
         name: true,
         createdAt: true,
+        isDefault: true,
       },
     });
     return new Response(JSON.stringify({ status: "success", projects }), {

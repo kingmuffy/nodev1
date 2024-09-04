@@ -38,7 +38,7 @@ const MainNode = ({ data }) => (
         marginBottom: "12px",
         fontSize: "15px",
         textAlign: "center",
-        color: "#555", // Slightly lighter title color for elegance
+        color: "#555",
       }}
     >
       {data.label}
@@ -82,7 +82,7 @@ const MainNode = ({ data }) => (
             position={Position.Left}
             id={`handle-${index}`}
             style={{
-              background: "#40E0D0", // Keeping the handle color vibrant
+              background: "#40E0D0",
               width: "8px",
               height: "8px",
               borderRadius: "50%",
