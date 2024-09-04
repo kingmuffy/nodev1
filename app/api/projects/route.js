@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
