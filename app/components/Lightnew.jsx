@@ -10,34 +10,13 @@ const LightNew = ({ lights = [], onUpdate }) => {
 
   return (
     <>
-      {lights && lights.length > 0 ? (
-        lights.map((light) => {
-          if (!light || !light.id || !light.lightType) {
-            console.error("Invalid light data:", light);
-            return null;
-          }
-
-          const mappedLight = {
-            ...light,
-            type: light.lightType,
-            // castShadow: true,
-          };
-
-          const filteredLight = Object.fromEntries(
-            Object.entries(mappedLight).filter(([key, value]) => value !== null)
-          );
-
-          return (
-            <LightComponent
-              key={filteredLight.id}
-              light={filteredLight}
-              updateLightContext={updateLightContext}
-            />
-          );
-        })
-      ) : (
-        <></>
-      )}
+      {lights.map((light) => (
+        <LightComponent
+          key={light.id}
+          light={{ ...light, type: light.lightType }}
+          updateLightContext={updateLightContext}
+        />
+      ))}
     </>
   );
 };

@@ -7,6 +7,7 @@ export const LightProvider = ({ children }) => {
   const [selectedLight, setSelectedLight] = useState("Ambient Light");
   const [lights, setLights] = useState([]);
 
+  // Function to add a new light
   const addLight = () => {
     const defaultProperties = {
       "Ambient Light": [
@@ -94,6 +95,7 @@ export const LightProvider = ({ children }) => {
           position: [0, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -103,6 +105,7 @@ export const LightProvider = ({ children }) => {
           position: [0, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -112,6 +115,7 @@ export const LightProvider = ({ children }) => {
           position: [0, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -121,6 +125,7 @@ export const LightProvider = ({ children }) => {
           position: [0, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
       ],
       "Point Light": [
@@ -132,6 +137,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -141,6 +147,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -150,6 +157,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -159,6 +167,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: null,
           decay: null,
+          castShadow: true,
         },
       ],
       "Spot Light": [
@@ -170,6 +179,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -179,6 +189,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -188,6 +199,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
+          castShadow: true,
         },
         {
           id: uuidv4(),
@@ -197,6 +209,7 @@ export const LightProvider = ({ children }) => {
           position: [5, 5, 5],
           angle: Math.PI / 6,
           decay: 2,
+          castShadow: true,
         },
       ],
     };
@@ -215,16 +228,23 @@ export const LightProvider = ({ children }) => {
     }
   };
 
+  // Function to delete a light
   const deleteLight = (lightToDelete) => {
     setLights(lights.filter((light) => light.id !== lightToDelete.id));
   };
 
+  // Function to update light properties
   const updateLight = (id, updatedProperties) => {
     setLights((prevLights) =>
       prevLights.map((light) =>
         light.id === id ? { ...light, ...updatedProperties } : light
       )
     );
+  };
+
+  // Function to reset lights when loading a new project
+  const resetLights = (newLights) => {
+    setLights(newLights);
   };
 
   return (
@@ -237,6 +257,7 @@ export const LightProvider = ({ children }) => {
         addLight,
         deleteLight,
         updateLight,
+        resetLights, // Added to reset lights when loading a new project
       }}
     >
       {children}

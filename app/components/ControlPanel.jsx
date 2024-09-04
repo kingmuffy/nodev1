@@ -7,6 +7,8 @@ import ReactFlow, {
   Background,
   ReactFlowProvider,
 } from "reactflow";
+import { v4 as uuidv4 } from "uuid";
+
 import "reactflow/dist/style.css";
 import MainNode from "./MainNode";
 import MapNode from "./MapNode";
@@ -73,7 +75,9 @@ const ControlPanel = () => {
     setLights,
     selectedLight,
     setSelectedLight,
+    resetLights,
   } = useContext(LightContext);
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { connectedMaps, materialParams, updateConnectedMaps } =
@@ -273,6 +277,7 @@ const ControlPanel = () => {
   const closeLoadProjectDialog = () => {
     setLoadProjectDialogOpen(false);
   };
+
   const loadProject = async (projectId) => {
     try {
       setLoading(true);
@@ -280,13 +285,16 @@ const ControlPanel = () => {
       const response = await axios.get(`/api/project/${projectId}`);
 
       if (response.data.status === "success") {
+        // Reset Leva controls by resetting the light state before loading new lights
         setLights([]);
+        resetLights();
 
         const loadedLights = response.data.project.lightSettings.map(
           (light) => ({
             ...light,
             angle: light.angle ?? 0,
             decay: light.decay ?? 1,
+            id: uuidv4(), // Generate new IDs if needed
           })
         );
 
@@ -311,7 +319,7 @@ const ControlPanel = () => {
         const baseSettings = {
           lightType: light.type,
           intensity: light.intensity,
-          // castShadow: light.castShadow ?? true,
+          castShadow: light.castShadow ?? true,
         };
 
         if (light.position) {
@@ -345,7 +353,7 @@ const ControlPanel = () => {
     } finally {
       setLoading(false);
       setSnackbarOpen(true);
-      closeProjectDialog(); // Close the project name dialog
+      closeProjectDialog();
     }
   };
 

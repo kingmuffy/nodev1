@@ -11,15 +11,17 @@ export default function Page() {
       <MapProvider>
         <Split
           className="flex h-screen"
-          sizes={[50, 50]}
-          minSize={200}
-          direction="horizontal"
-          gutterSize={4}
+          sizes={[50, 50]} // Ensure the two panels are equal by default
+          minSize={200} // The minimum size for each panel
+          direction="horizontal" // Horizontally split the screen
+          gutterSize={4} // The size of the gutter between the panels
         >
           <div className="flex justify-center items-center bg-gray-900">
+            {/* FabricPreview panel */}
             <FabricPreview />
           </div>
           <div className="flex flex-col h-full">
+            {/* ControlPanel panel */}
             <ControlPanel />
           </div>
         </Split>

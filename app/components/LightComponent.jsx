@@ -1,10 +1,14 @@
 import React, { useRef, useEffect } from "react";
 import { useHelper } from "@react-three/drei";
 import * as THREE from "three";
-import { useControls } from "leva";
+import { useControls, folder } from "leva";
 
-const useLightControls = (light) => {
-  const controlSettings = {
+const LightComponent = ({ light, updateLightContext }) => {
+  const lightRef = useRef();
+
+  const simplifiedKey = `${light.type} - ${light.id.slice(0, 8)}`; // Use only the first 8 characters of the UUID
+
+  const controls = useControls(simplifiedKey, {
     intensity: { value: light.intensity || 1, min: 0, max: 10 },
     position: {
       value: light.position || [0, 0, 0],
@@ -12,38 +16,64 @@ const useLightControls = (light) => {
       max: 10,
       step: 0.1,
     },
-  };
+    ...(light.type.includes("Spot Light") && {
+      angle: {
+        value: light.angle || Math.PI / 6,
+        min: 0,
+        max: Math.PI / 2,
+      },
+      decay: { value: light.decay || 2, min: 0, max: 2 },
+    }),
+    ...(light.type.includes("Directional Light") ||
+    light.type.includes("Point Light") ||
+    light.type.includes("Spot Light")
+      ? {
+          castShadow: {
+            value: light.castShadow !== undefined ? light.castShadow : true,
+          },
+        }
+      : {}),
+  });
 
-  // Add angle and decay controls only for lights that need them
-  if (light.type.includes("Spot Light")) {
-    controlSettings.angle = {
-      value: light.angle || Math.PI / 6,
-      min: 0,
-      max: Math.PI / 2,
-    };
-    controlSettings.decay = { value: light.decay || 2, min: 0, max: 2 };
-  }
+  useEffect(() => {
+    if (lightRef.current) {
+      lightRef.current.intensity = controls.intensity;
+      lightRef.current.position.set(...controls.position);
 
-  return useControls(`${light.type} Controls`, controlSettings);
-};
+      if (
+        light.type.includes("Directional Light") ||
+        light.type.includes("Point Light") ||
+        light.type.includes("Spot Light")
+      ) {
+        lightRef.current.castShadow = controls.castShadow;
+        lightRef.current.shadow.bias = -0.005;
+        lightRef.current.shadow.camera.far = 50;
+        lightRef.current.shadow.camera.near = 0.5;
+        lightRef.current.shadow.mapSize.width = 1024;
+        lightRef.current.shadow.mapSize.height = 1024;
+      }
 
-const LightComponent = ({ light, updateLightContext }) => {
-  const lightRef = useRef();
+      if (light.type.includes("Spot Light")) {
+        lightRef.current.angle = controls.angle;
+        lightRef.current.decay = controls.decay;
+      }
 
-  // Use a single hook for all lights
-  const controls = useLightControls(light);
-  let applicableProps = {
-    intensity: controls.intensity,
-    position: controls.position,
-  };
-
-  if (light.type.includes("Spot Light")) {
-    applicableProps = {
-      ...applicableProps,
-      angle: controls.angle,
-      decay: controls.decay,
-    };
-  }
+      if (updateLightContext) {
+        updateLightContext(light.id, {
+          ...light,
+          ...controls,
+        });
+      }
+    }
+  }, [
+    light,
+    controls.intensity,
+    controls.position,
+    controls.angle,
+    controls.decay,
+    controls.castShadow,
+    updateLightContext,
+  ]);
 
   useHelper(
     lightRef,
@@ -59,43 +89,6 @@ const LightComponent = ({ light, updateLightContext }) => {
     1
   );
 
-  useEffect(() => {
-    if (lightRef.current) {
-      const pos = controls?.position || [0, 0, 0];
-
-      // Set the position and other properties based on light type
-      if (
-        light.type.includes("Directional Light") ||
-        light.type.includes("Point Light") ||
-        light.type.includes("Spot Light")
-      ) {
-        lightRef.current.position.set(...pos);
-      }
-
-      if (light.type.includes("Spot Light")) {
-        lightRef.current.angle = controls.angle;
-        lightRef.current.decay = controls.decay;
-      }
-
-      lightRef.current.intensity = controls.intensity;
-      // lightRef.current.castShadow = true;
-
-      if (updateLightContext) {
-        updateLightContext(light.id, {
-          ...light,
-          ...applicableProps,
-        });
-      }
-    }
-  }, [
-    controls.position,
-    controls.angle,
-    controls.decay,
-    controls.intensity,
-    light,
-    updateLightContext,
-  ]);
-
   return (
     <>
       {light.type.includes("Ambient Light") && (
@@ -109,11 +102,12 @@ const LightComponent = ({ light, updateLightContext }) => {
           ref={lightRef}
           intensity={controls.intensity}
           position={controls.position}
-          castShadow
+          castShadow={controls.castShadow}
+          shadow-bias={-0.005}
+          shadow-camera-far={50}
+          shadow-camera-near={0.5}
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
-          shadow-camera-far={50}
-          shadow-bias={-0.005}
         />
       )}
       {light.type.includes("Point Light") && (
@@ -121,7 +115,12 @@ const LightComponent = ({ light, updateLightContext }) => {
           ref={lightRef}
           intensity={controls.intensity}
           position={controls.position}
-          // castShadow
+          castShadow={controls.castShadow}
+          shadow-bias={-0.005}
+          shadow-camera-far={50}
+          shadow-camera-near={0.5}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
         />
       )}
       {light.type.includes("Spot Light") && (
@@ -131,7 +130,12 @@ const LightComponent = ({ light, updateLightContext }) => {
           position={controls.position}
           angle={controls.angle}
           decay={controls.decay}
-          // castShadow
+          castShadow={controls.castShadow}
+          shadow-bias={-0.005}
+          shadow-camera-far={50}
+          shadow-camera-near={0.5}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
         />
       )}
     </>
