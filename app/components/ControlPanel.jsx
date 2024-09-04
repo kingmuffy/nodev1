@@ -353,7 +353,7 @@ const ControlPanel = () => {
       });
 
       if (response.data.status === "success") {
-        setSnackbarMessage("Project set as default successfully!");
+        setSnackbarMessage("Light set as default successfully!");
       } else {
         setSnackbarMessage("Failed to set project as default.");
       }
