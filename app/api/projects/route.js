@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 
 export async function GET(req) {
   try {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+
     const projects = await prisma.project.findMany({
       select: {
         id: true,

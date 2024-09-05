@@ -7,6 +7,8 @@ export async function GET(request, { params }) {
   const { projectId } = params;
 
   try {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: { lightSettings: true },
