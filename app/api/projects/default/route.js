@@ -1,12 +1,8 @@
-export const revalidate = 0;
-
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function GET(req, res) {
   try {
-    res.setHeader("Cache-Control", "no-store, max-age=0");
-
     const defaultProject = await prisma.project.findFirst({
       where: { isDefault: true },
       include: { lightSettings: true },
@@ -50,3 +46,4 @@ export async function GET(req, res) {
     );
   }
 }
+export const revalidate = 0;
