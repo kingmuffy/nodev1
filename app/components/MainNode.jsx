@@ -10,7 +10,7 @@ const mapInfo = {
   Bump: "Adds surface detail without changing geometry.",
   Normal: "Enhances surface detail using normal vectors.",
   Displacement: "Modifies the surface geometry for added detail.",
-  Specular: "Determines the shininess and highlight size.",
+  anisotropyMap: "Determines the shininess and highlight size.",
   Emissive: "Makes the material appear self-illuminated.",
   Opacity: "Controls the transparency of the material.",
   AO: "Adds shading based on occlusion by surrounding objects.",

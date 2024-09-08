@@ -8,23 +8,22 @@ const LightComponent = ({ light, updateLightContext }) => {
 
   const simplifiedKey = `${light.type} - ${light.id.slice(0, 8)}`;
 
-  // Ensure all values are passed properly and fallback to default values only when necessary
   const controls = useControls(simplifiedKey, {
-    intensity: { value: light.intensity ?? 1, min: 0, max: 10 }, // Ensure that the intensity falls back to 1 only if light.intensity is undefined
+    intensity: { value: light.intensity ?? 1, min: 0, max: 10 },
     position: {
-      value: light.position ?? [0, 0, 0], // Same fallback for position
+      value: light.position ?? [0, 0, 0],
       min: -10,
       max: 10,
       step: 0.1,
     },
     ...(light.type.includes("Spot Light") && {
       angle: {
-        value: light.angle ?? Math.PI / 6, // Use light.angle or fallback
+        value: light.angle ?? Math.PI / 6,
         min: 0,
         max: Math.PI / 2,
       },
       decay: {
-        value: light.decay ?? 1, // Use light.decay or fallback
+        value: light.decay ?? 1,
         min: 0,
         max: 2,
       },
@@ -35,6 +34,17 @@ const LightComponent = ({ light, updateLightContext }) => {
       ? {
           castShadow: {
             value: light.castShadow !== undefined ? light.castShadow : true,
+          },
+        }
+      : {}),
+    ...(light.type.includes("Directional Light") ||
+    light.type.includes("Spot Light")
+      ? {
+          targetPosition: {
+            value: light.targetPosition ?? [0, 0, 0],
+            min: -10,
+            max: 10,
+            step: 0.1,
           },
         }
       : {}),
@@ -63,7 +73,14 @@ const LightComponent = ({ light, updateLightContext }) => {
         lightRef.current.decay = controls.decay;
       }
 
-      // Update the light context with the latest controls data
+      if (
+        light.type.includes("Directional Light") ||
+        light.type.includes("Spot Light")
+      ) {
+        lightRef.current.target.position.set(...controls.targetPosition);
+        lightRef.current.target.updateMatrixWorld();
+      }
+
       if (updateLightContext) {
         updateLightContext(light.id, {
           ...light,
@@ -72,6 +89,7 @@ const LightComponent = ({ light, updateLightContext }) => {
           angle: controls.angle,
           decay: controls.decay,
           castShadow: controls.castShadow,
+          targetPosition: controls.targetPosition,
         });
       }
     }
@@ -82,6 +100,7 @@ const LightComponent = ({ light, updateLightContext }) => {
     controls.angle,
     controls.decay,
     controls.castShadow,
+    controls.targetPosition,
     updateLightContext,
   ]);
 

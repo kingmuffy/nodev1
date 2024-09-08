@@ -10,6 +10,9 @@ export async function POST(request) {
       lightType: light.lightType,
       intensity: light.intensity,
       position: light.position ? JSON.parse(light.position) : [0, 0, 0],
+      targetPosition: light.targetPosition
+        ? JSON.parse(light.targetPosition)
+        : [0, 0, 0],
       angle: light.angle ?? null,
       decay: light.decay ?? null,
       castShadow: light.castShadow ?? false,

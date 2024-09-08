@@ -384,6 +384,9 @@ const ControlPanel = () => {
         if (light.position) {
           baseSettings.position = JSON.stringify(light.position);
         }
+        if (light.targetPosition) {
+          baseSettings.targetPosition = JSON.stringify(light.targetPosition);
+        }
 
         if (light.angle !== undefined) {
           baseSettings.angle = light.angle;

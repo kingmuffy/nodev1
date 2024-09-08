@@ -15,7 +15,7 @@ const FabricEditPreview = ({ parameters }) => {
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
-  const guiRef = useRef(null); // Ref for GUI container
+  const guiRef = useRef(null);
 
   const modelPath = "/FabricTexture.fbx";
 
@@ -35,7 +35,6 @@ const FabricEditPreview = ({ parameters }) => {
       clearcoat: parameters.clearcoat || 0,
     };
 
-    // Setup the GUI controls
     gui
       .add(params, "bumpScale", 0, 1)
       .step(0.01)
@@ -60,6 +59,8 @@ const FabricEditPreview = ({ parameters }) => {
         updateMaterialParams("emissiveIntensity", value);
       });
 
+    gui.add;
+
     gui
       .add(params, "metalness", 0, 1)
       .step(0.01)
@@ -76,7 +77,6 @@ const FabricEditPreview = ({ parameters }) => {
         updateMaterialParams("roughness", value);
       });
 
-    // New controls
     gui
       .add(params, "displacementBias", -1, 1)
       .step(0.01)
@@ -106,7 +106,6 @@ const FabricEditPreview = ({ parameters }) => {
         updateMaterialParams("clearcoat", value);
       });
 
-    // Prevent scroll wheel from affecting other elements
     gui.domElement.addEventListener("wheel", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -118,7 +117,6 @@ const FabricEditPreview = ({ parameters }) => {
     };
   }, [parameters, updateMaterialParams]);
 
-  // Load the model when the component mounts
   useEffect(() => {
     const loadModel = async () => {
       if (currentModel) {
@@ -222,7 +220,6 @@ const FabricEditPreview = ({ parameters }) => {
                   }
                 );
               } else {
-                // Handle removal of the texture if the fileOrUrl is null or undefined
                 switch (mapType) {
                   case "Diffuse":
                     materialConfig.map = null;

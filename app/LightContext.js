@@ -92,6 +92,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Directional Light 1",
           intensity: 1,
           position: [0, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: null,
           decay: null,
           castShadow: true,
@@ -102,6 +104,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Directional Light 2",
           intensity: 1,
           position: [0, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: null,
           decay: null,
           castShadow: true,
@@ -112,6 +116,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Directional Light 3",
           intensity: 1,
           position: [0, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: null,
           decay: null,
           castShadow: true,
@@ -122,6 +128,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Directional Light 4",
           intensity: 1,
           position: [0, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: null,
           decay: null,
           castShadow: true,
@@ -176,6 +184,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Spot Light 1",
           intensity: 1,
           position: [5, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: Math.PI / 6,
           decay: 2,
           castShadow: true,
@@ -186,6 +196,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Spot Light 2",
           intensity: 1,
           position: [5, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: Math.PI / 6,
           decay: 2,
           castShadow: true,
@@ -196,6 +208,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Spot Light 3",
           intensity: 1,
           position: [5, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: Math.PI / 6,
           decay: 2,
           castShadow: true,
@@ -206,6 +220,8 @@ export const LightProvider = ({ children }) => {
           lightType: "Spot Light 4",
           intensity: 1,
           position: [5, 5, 5],
+          targetPosition: [0, 0, 0],
+
           angle: Math.PI / 6,
           decay: 2,
           castShadow: true,
