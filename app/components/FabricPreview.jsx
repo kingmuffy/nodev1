@@ -18,8 +18,11 @@ import axios from "axios";
 
 const FabricPreview = () => {
   const { lights, updateLight } = useContext(LightContext);
-  const { connectedMaps, materialParams, updateMaterialParams } =
-    useContext(MapContext);
+  const {
+    connectedMaps,
+    materialParams = {},
+    updateMaterialParams,
+  } = useContext(MapContext);
   const [currentModel, setCurrentModel] = useState(null);
   const guiRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -38,8 +41,6 @@ const FabricPreview = () => {
         decay: light.decay ?? null,
         castShadow: light.castShadow ?? true,
       }));
-
-      console.log("lightSettings payload:", lightSettings);
 
       const response = await axios.post("/api/lights", { lightSettings });
 
@@ -62,6 +63,10 @@ const FabricPreview = () => {
 
     const defaultMaterialParams = {
       bumpScale: 0,
+      sheenEnabled: false,
+      sheenIntensity: 1,
+      sheenRoughness: 0.5,
+      sheenColor: "#ffffff",
       displacementScale: 0,
       emissiveIntensity: 0,
       metalness: 0,
@@ -71,6 +76,7 @@ const FabricPreview = () => {
       aoMapIntensity: 0,
       clearcoat: 0,
       normalScale: new THREE.Vector2(1, 1),
+      diffuseTiling: new THREE.Vector2(1, 1),
     };
 
     const params = { ...defaultMaterialParams, ...materialParams };
@@ -87,10 +93,27 @@ const FabricPreview = () => {
                 child.material.normalScale = new THREE.Vector2(1, 1);
               }
               child.material.normalScale.set(value.x, value.y);
-            } else if (paramName !== "normalScale") {
+            } else if (paramName === "diffuseTiling" && child.material.map) {
+              child.material.map.repeat.set(value.x, value.y);
+              child.material.map.needsUpdate = true;
+            } else if (paramName.startsWith("sheen")) {
+              if (params.sheenEnabled) {
+                child.material.sheen = true;
+                if (paramName === "sheenColor") {
+                  child.material.sheenColor = new THREE.Color(value);
+                } else if (paramName === "sheenRoughness") {
+                  child.material.sheenRoughness = value;
+                } else if (paramName === "sheenIntensity") {
+                  child.material.sheenIntensity = value;
+                }
+              } else {
+                child.material.sheen = false;
+              }
+              child.material.needsUpdate = true;
+            } else {
               child.material[paramName] = value;
+              child.material.needsUpdate = true;
             }
-            child.material.needsUpdate = true;
           }
         });
       }
@@ -103,6 +126,28 @@ const FabricPreview = () => {
       .onChange((value) => {
         updateModelAndContext("bumpScale", value);
       });
+
+    gui.add(params, "sheenEnabled").onChange((value) => {
+      updateModelAndContext("sheenEnabled", value);
+    });
+
+    gui
+      .add(params, "sheenIntensity", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        updateModelAndContext("sheenIntensity", value);
+      });
+
+    gui
+      .add(params, "sheenRoughness", 0, 1)
+      .step(0.01)
+      .onChange((value) => {
+        updateModelAndContext("sheenRoughness", value);
+      });
+
+    gui.addColor(params, "sheenColor").onChange((value) => {
+      updateModelAndContext("sheenColor", value);
+    });
 
     gui
       .add(params, "displacementScale", 0, 1)
@@ -157,7 +202,6 @@ const FabricPreview = () => {
         updateModelAndContext("clearcoat", value);
       });
 
-    // Normal scale X and Y adjustment
     gui
       .add(params.normalScale, "x", 0, 3)
       .step(0.01)
@@ -176,6 +220,28 @@ const FabricPreview = () => {
       .onChange((value) => {
         updateModelAndContext("normalScale", {
           x: params.normalScale.x,
+          y: value,
+        });
+      });
+
+    gui
+      .add(params.diffuseTiling, "x", 0.1, 10)
+      .step(0.1)
+      .name("Diffuse Tiling X")
+      .onChange((value) => {
+        updateModelAndContext("diffuseTiling", {
+          x: value,
+          y: params.diffuseTiling.y,
+        });
+      });
+
+    gui
+      .add(params.diffuseTiling, "y", 0.1, 10)
+      .step(0.1)
+      .name("Diffuse Tiling Y")
+      .onChange((value) => {
+        updateModelAndContext("diffuseTiling", {
+          x: params.diffuseTiling.x,
           y: value,
         });
       });
@@ -250,6 +316,8 @@ const FabricPreview = () => {
 
                   switch (mapType) {
                     case "Diffuse":
+                      const { diffuseTiling = { x: 1, y: 1 } } = materialParams;
+                      texture.repeat.set(diffuseTiling.x, diffuseTiling.y);
                       materialConfig.map = texture;
                       break;
                     case "Bump":
@@ -258,7 +326,7 @@ const FabricPreview = () => {
                     case "Normal":
                       materialConfig.normalMap = texture;
                       break;
-                    case "Reflection":
+                    case "Environment":
                       materialConfig.envMap = texture;
                       break;
                     case "Refraction":
@@ -291,6 +359,7 @@ const FabricPreview = () => {
 
                   child.material = new MeshPhysicalMaterial({
                     ...materialConfig,
+                    sheen: materialParams.sheenEnabled,
                     shadowSide: DoubleSide,
                   });
                   child.material.needsUpdate = true;

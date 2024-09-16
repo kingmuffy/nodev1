@@ -43,7 +43,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const mapNames = [
   "Diffuse",
-  "Reflection",
+  "Environment",
   "Refraction",
   "Bump",
   "Normal",
@@ -372,7 +372,6 @@ const ControlPanel = () => {
     }
   };
 
-  // Handle checkbox change
   const handleCheckboxChange = (projectId) => {
     setDefaultProject(projectId);
   };

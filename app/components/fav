@@ -157,7 +157,7 @@ const FabricPreview = () => {
                     case "Normal":
                       materialConfig.normalMap = texture;
                       break;
-                    case "Reflection":
+                    case "Environment":
                       materialConfig.envMap = texture;
                       break;
                     case "Refraction":

@@ -7,6 +7,7 @@ export const MapProvider = ({ children, initialMaterialParams }) => {
 
   const [materialParams, setMaterialParams] = useState({
     bumpScale: initialMaterialParams?.bumpScale || 0.0,
+    Sheen: initialMaterialParams?.sheen || 0.0,
     displacementScale: initialMaterialParams?.displacementScale || 0.0,
     emissiveIntensity: initialMaterialParams?.emissiveIntensity || 0.0,
     metalness: initialMaterialParams?.metalness || 0.0,
