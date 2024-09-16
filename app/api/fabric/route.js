@@ -1,3 +1,4 @@
+"use server";
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
@@ -62,9 +63,12 @@ export async function POST(request) {
       displacementBias: parseFloat(formData.get("displacementBias")), // New field
       flatShading: formData.get("flatShading") === "true", // New field
       aoMapIntensity: parseFloat(formData.get("aoMapIntensity")), // New field
-      clearcoat: parseFloat(formData.get("clearcoat")), // New field
-      fabricName: formData.get("fabricName"), // Get fabric name
-      fabricColor: formData.get("fabricColor"), // Get fabric color
+      clearcoat: parseFloat(formData.get("clearcoat")),
+      normalScaleX: parseFloat(formData.get("normalScaleX")), // New field
+      normalScaleY: parseFloat(formData.get("normalScaleY")),
+      sheen: parseFloat(formData.get("sheen")),
+      fabricName: formData.get("fabricName"),
+      fabricColor: formData.get("fabricColor"),
     };
 
     console.log("Initial fabric data:", fabricData);

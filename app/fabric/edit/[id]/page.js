@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Split from "react-split";
 import FabricEditPreview from "../../../components/FabricEditPreview";
@@ -15,7 +14,7 @@ const EditPage = ({ params }) => {
   useEffect(() => {
     const fetchParameters = async () => {
       try {
-        const { id } = params; // Get the fabric ID from params
+        const { id } = params;
         const response = await axios.get(`/api/getparameters?id=${id}`);
         if (response.data.status === "success") {
           setParameters(response.data.fabric);

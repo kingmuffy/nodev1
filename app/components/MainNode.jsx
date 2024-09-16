@@ -8,7 +8,8 @@ const mapInfo = {
   Reflection: "Controls the reflectivity of the surface.",
   Refraction: "Determines how light bends through the material.",
   Bump: "Adds surface detail without changing geometry.",
-  Normal: "Enhances surface detail using normal vectors.",
+  Normal:
+    "The texture to create a normal map. The RGB values affect the surface normal for each pixel fragment and change the way the color is lit. Normal maps do not change the actual shape of the surface, only the lighting. In case the material has a normal map authored using the left handed convention, the y component of normalScale should be negated to compensate for the different handedness.",
   Displacement: "Modifies the surface geometry for added detail.",
   anisotropyMap: "Determines the shininess and highlight size.",
   Emissive: "Makes the material appear self-illuminated.",

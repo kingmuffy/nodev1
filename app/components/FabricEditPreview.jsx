@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -10,14 +11,19 @@ import {
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MapContext } from "../MapContext";
 import { GUI } from "lil-gui";
+import { LightContext } from "../LightContext";
+
+import LightNew from "./Lightnew";
 
 const FabricEditPreview = ({ parameters }) => {
+  const { lights, updateLight } = useContext(LightContext);
+
   const [currentModel, setCurrentModel] = useState(null);
   const { connectedMaps, materialParams, updateMaterialParams } =
     useContext(MapContext);
   const guiRef = useRef(null);
 
-  const modelPath = "/FabricTexture.fbx";
+  const modelPath = "/Tetrad-Ruben-Midi-Standard.fbx";
 
   useEffect(() => {
     const guiContainer = guiRef.current;
@@ -274,13 +280,14 @@ const FabricEditPreview = ({ parameters }) => {
 
   return (
     <>
-      <Canvas>
+      <Canvas style={{ backgroundColor: "#efefef" }}>
         <ambientLight intensity={1.5} />
         <directionalLight position={[10, 10, 5]} intensity={1.0} />
         {currentModel && <primitive object={currentModel} />}
         <OrbitControls />
+        <LightNew lights={lights} onUpdate={updateLight} />
       </Canvas>
-      {/* GUI container */}
+
       <div
         ref={guiRef}
         style={{ position: "absolute", top: 0, right: 0, zIndex: 1000 }}

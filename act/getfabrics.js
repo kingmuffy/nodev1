@@ -14,7 +14,6 @@ export default async function getFolderWithFbxas(folderId) {
       },
     });
 
-    // Ensure that fabrics is always an array
     return fabrics || [];
   } catch (error) {
     console.error("Failed to get Folder and its Fbxas:", error);

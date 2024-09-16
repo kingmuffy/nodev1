@@ -76,6 +76,9 @@ model FabricMap {
   flatShading           Boolean? 
   aoMapIntensity        Float?   
   clearcoat             Float?  
+   normalScaleX          Float? 
+   normalScaleY   Float? 
+  sheen                 Float? 
   fabricName            String?  
   fabricColor           String?  
   createdAt             DateTime @default(now())

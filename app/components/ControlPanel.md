@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useContext } from "react";
+import React, { useCallback, useState, useContext, useEffect } from "react";
 import ReactFlow, {
 addEdge,
 useNodesState,
@@ -7,18 +7,39 @@ Controls,
 Background,
 ReactFlowProvider,
 } from "reactflow";
+import { v4 as uuidv4 } from "uuid";
+import { Checkbox, ListItemIcon } from "@mui/material";
+
 import "reactflow/dist/style.css";
 import MainNode from "./MainNode";
 import MapNode from "./MapNode";
 import { MapContext } from "../MapContext";
+import { LightContext } from "../LightContext";
 import {
 Snackbar,
 Alert,
 Button,
 TextField,
 CircularProgress,
+Menu,
+MenuItem,
+Dialog,
+DialogActions,
+DialogContent,
+DialogTitle,
+List,
+ListItem,
+ListItemText,
 } from "@mui/material";
 import axios from "axios";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import SettingsIcon from "@mui/icons-material/Settings";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const mapNames = [
 "Diffuse",
@@ -56,6 +77,16 @@ style: { strokeWidth: 4 },
 };
 
 const ControlPanel = () => {
+const {
+lights,
+addLight,
+deleteLight,
+setLights,
+selectedLight,
+setSelectedLight,
+resetLights,
+} = useContext(LightContext);
+
 const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 const { connectedMaps, materialParams, updateConnectedMaps } =
@@ -67,6 +98,20 @@ const [snackbarOpen, setSnackbarOpen] = useState(false);
 const [snackbarMessage, setSnackbarMessage] = useState("");
 const [confirmDelete, setConfirmDelete] = useState(null);
 const [loading, setLoading] = useState(false);
+const [anchorEl, setAnchorEl] = useState(null);
+const [projectName, setProjectName] = useState("");
+const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+const [loadProjectDialogOpen, setLoadProjectDialogOpen] = useState(false);
+const [projects, setProjects] = useState([]);
+const open = Boolean(anchorEl);
+
+const handleMenuClick = (event) => {
+setAnchorEl(event.currentTarget);
+};
+
+const handleMenuClose = () => {
+setAnchorEl(null);
+};
 
 const updateNodeData = useCallback(
 (nodeId, file, thumbnail, label) => {
@@ -129,7 +174,39 @@ const sourceNode = nodes.find((node) => node.id === params.source);
     [setEdges, nodes, setNodes, updateConnectedMaps]
 
 );
+const loadDefaultLightSettings = async () => {
+try {
+setLoading(true);
 
+      const response = await axios.get("/api/projects/default");
+
+      if (response.data.status === "success") {
+        resetLights();
+
+        const loadedLights = response.data.project.lightSettings.map(
+          (light) => ({
+            ...light,
+            id: uuidv4(),
+          })
+        );
+
+        setLights(loadedLights);
+        setSnackbarMessage("Default light settings loaded successfully!");
+      } else {
+        setSnackbarMessage("Failed to load default light settings.");
+      }
+    } catch (error) {
+      console.error("Error loading default light settings:", error);
+      setSnackbarMessage("Error loading default light settings.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+
+};
+useEffect(() => {
+loadDefaultLightSettings();
+}, []);
 const onEdgeDoubleClick = useCallback(
 (event, edge) => {
 event.stopPropagation();
@@ -213,6 +290,150 @@ type: "mapNode",
 setNodes((nds) => nds.concat(newNode));
 }, [nodes, setNodes, updateNodeData]);
 
+const openProjectDialog = () => {
+setProjectDialogOpen(true);
+};
+
+const closeProjectDialog = () => {
+setProjectDialogOpen(false);
+};
+
+const openLoadProjectDialog = async () => {
+try {
+setLoading(true);
+const response = await axios.get("/api/projects");
+
+      if (response.data.status === "success") {
+        setProjects(response.data.projects);
+        setLoadProjectDialogOpen(true);
+      } else {
+        setSnackbarMessage("Failed to load projects.");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      setSnackbarMessage("Error loading projects.");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+
+};
+
+const closeLoadProjectDialog = () => {
+setLoadProjectDialogOpen(false);
+};
+
+const loadProject = async (projectId) => {
+try {
+setLoading(true);
+
+      const response = await axios.get(`/api/project/${projectId}`);
+
+      if (response.data.status === "success") {
+        setLights([]);
+        resetLights();
+
+        const loadedLights = response.data.project.lightSettings.map(
+          (light) => ({
+            ...light,
+            angle: light.angle ?? 0,
+            decay: light.decay ?? 1,
+            id: uuidv4(),
+          })
+        );
+
+        setLights(loadedLights);
+        setSnackbarMessage("Light settings loaded successfully!");
+      } else {
+        setSnackbarMessage("Failed to load light settings.");
+      }
+    } catch (error) {
+      console.error("Error loading light settings:", error);
+      setSnackbarMessage("Error loading light settings.");
+    } finally {
+      setLoading(false);
+      closeLoadProjectDialog();
+    }
+
+};
+
+const setDefaultProject = async (projectId) => {
+try {
+setLoading(true);
+const response = await axios.put(`/api/projects/set-default`, {
+projectId,
+});
+
+      if (response.data.status === "success") {
+        setSnackbarMessage("Light set as default successfully!");
+      } else {
+        setSnackbarMessage("Failed to set Light as default.");
+      }
+    } catch (error) {
+      console.error("Error setting default project:", error);
+      setSnackbarMessage("Error setting default project.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+
+};
+
+// Handle checkbox change
+const handleCheckboxChange = (projectId) => {
+setDefaultProject(projectId);
+};
+
+const saveLightSettings = async () => {
+setLoading(true);
+try {
+const lightSettings = lights.map((light) => {
+const baseSettings = {
+lightType: light.type,
+intensity: light.intensity,
+castShadow: light.castShadow ?? true,
+};
+
+        if (light.position) {
+          baseSettings.position = JSON.stringify(light.position);
+        }
+        if (light.targetPosition) {
+          baseSettings.targetPosition = JSON.stringify(light.targetPosition);
+        }
+
+        if (light.angle !== undefined) {
+          baseSettings.angle = light.angle;
+        }
+
+        if (light.decay !== undefined) {
+          baseSettings.decay = light.decay;
+        }
+
+        return baseSettings;
+      });
+
+      const response = await axios.post("/api/lights", {
+        projectName,
+        lightSettings,
+      });
+
+      if (response.data.status === "success") {
+        setSnackbarMessage("Light settings saved successfully!");
+      } else {
+        setSnackbarMessage("Failed to save light settings.");
+      }
+    } catch (error) {
+      console.error("Error saving light settings:", error);
+      setSnackbarMessage("Error saving light settings.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+      closeProjectDialog();
+    }
+
+};
+
 const handleSave = async () => {
 setLoading(true);
 try {
@@ -249,27 +470,33 @@ const formData = new FormData();
 
 };
 
+const [isOpen, setIsOpen] = useState(true);
+
+const toggleDropdown = () => {
+setIsOpen(!isOpen);
+};
+
 return (
 <div className="flex h-full" onContextMenu={(e) => e.preventDefault()}>
 <ReactFlowProvider>
 <div className="flex-auto bg-gray-800 relative">
 <ReactFlow
-nodes={nodes}
-edges={edges}
-onNodesChange={onNodesChange}
-onEdgesChange={onEdgesChange}
-onConnect={onConnect}
-onEdgeDoubleClick={onEdgeDoubleClick}
-onNodeContextMenu={onNodeContextMenu}
-nodeTypes={nodeTypes}
-fitView
-defaultEdgeOptions={edgeOptions} // Use defaultEdgeOptions for edge styles >
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onEdgeDoubleClick={onEdgeDoubleClick}
+            onNodeContextMenu={onNodeContextMenu}
+            nodeTypes={nodeTypes}
+            fitView
+            defaultEdgeOptions={edgeOptions}
+          >
 <Controls />
 <Background />
 </ReactFlow>
 </div>
-{/_ Reposition the control panel to the bottom right _/}
-<div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
+<div className="fixed bottom-0 right-0 w-64 p-4  bg-gray-900 text-white z-50">
 <TextField
 label="Fabric Name"
 variant="filled"
@@ -294,21 +521,254 @@ sx={{
               borderRadius: "4px",
             }}
 />
-<Button
-onClick={addNode}
-className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-sx={{ marginRight: "7px" }} >
-CREATE NODE
-</Button>
-<Button
+<select
+onChange={(e) => setSelectedLight(e.target.value)}
+value={selectedLight}
+style={{ marginBottom: "10px", width: "100%", color: "black" }} >
+<option value="Ambient Light">Ambient Light</option>
+<option value="Hemisphere Light">Hemisphere Light</option>
+<option value="Directional Light">Directional Light</option>
+<option value="Point Light">Point Light</option>
+<option value="Spot Light">Spot Light</option>
+</select>
+<div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-800 text-white z-50 rounded-lg shadow-lg">
+<input
+type="text"
+placeholder="Fabric Name"
+value={fabricName}
+onChange={(e) => setFabricName(e.target.value)}
+className="w-full p-2 mb-4 text-black rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+<input
+type="text"
+placeholder="Fabric Color"
+value={fabricColor}
+onChange={(e) => setFabricColor(e.target.value)}
+className="w-full p-2 mb-4 text-black rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+
+            <select
+              onChange={(e) => setSelectedLight(e.target.value)}
+              value={selectedLight}
+              className="w-full p-2 mb-4 text-black rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Ambient Light">Ambient Light</option>
+              <option value="Hemisphere Light">Hemisphere Light</option>
+              <option value="Directional Light">Directional Light</option>
+              <option value="Point Light">Point Light</option>
+              <option value="Spot Light">Spot Light</option>
+            </select>
+
+            <div className="flex items-center space-x-2 mb-4">
+              <button
+                onClick={addLight}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center space-x-2"
+              >
+                <AddIcon />
+                <span>Add</span>
+              </button>
+              <button
+                aria-controls="long-menu"
+                aria-haspopup="true"
+                onClick={handleMenuClick}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center space-x-2"
+              >
+                <span>Light</span>
+                <SettingsIcon />
+              </button>
+            </div>
+
+            <h4 className="flex items-center gap-2 text-lg font-semibold mb-4">
+              <LightbulbIcon className="text-yellow-400" />
+              Lights
+            </h4>
+
+            {lights.length > 0 ? (
+              <div className="bg-gray-900 p-4 rounded-lg">
+                {/* Dropdown Toggle Button */}
+                <div
+                  className="flex items-center justify-between bg-gray-800 text-white py-3 px-4 rounded-lg cursor-pointer"
+                  onClick={toggleDropdown}
+                >
+                  <div className="flex items-center space-x-2">
+                    <AddIcon className="text-yellow-400" />
+                    <h4 className="text-white">Lights</h4>
+                  </div>
+                  <span className="text-white">{isOpen ? "-" : "+"}</span>
+                </div>
+
+                {/* Dropdown Content */}
+                {isOpen && (
+                  <div className="mt-4">
+                    {lights.length > 0 ? (
+                      lights.map((light, index) => (
+                        <div
+                          key={index}
+                          className="relative flex items-center justify-between mb-1 px-2 bg-gray-700 rounded-lg shadow-md"
+                          style={{
+                            height: "32px", // Sleek height
+                            border: "1px solid #3a3f47", // Border for sleek boxes
+                            boxShadow:
+                              index === lights.length - 1
+                                ? "0 0 10px #008cff"
+                                : "none", // Highlight effect for selected light
+                          }}
+                        >
+                          {/* Vertical connector line on the left */}
+                          {index !== lights.length - 1 && (
+                            <div className="absolute -left-5 top-1/2 h-full w-px bg-gray-500 transform -translate-y-1/2"></div>
+                          )}
+
+                          {/* Horizontal line connecting to the individual light box */}
+                          <div className="absolute -left-5 top-1/2 w-4 h-px bg-gray-500"></div>
+
+                          {/* Light name container with an icon */}
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-300 flex items-center">
+                              <span
+                                className="mr-2 flex items-center justify-center rounded-full bg-gray-600"
+                                style={{ width: "20px", height: "20px" }}
+                              >
+                                <span className="text-white">🗂️</span>{" "}
+                                {/* Light icon */}
+                              </span>
+                              {light.type}
+                            </span>
+                          </div>
+
+                          {/* Delete button on the right */}
+                          <button
+                            onClick={() => deleteLight(light)}
+                            className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded transition-colors"
+                            style={{ fontSize: "12px" }} // Adjusting font size for sleeker look
+                          >
+                            <DeleteIcon />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-300">No lights added yet.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p>No lights added yet.</p>
+            )}
+
+            <div className="flex space-x-2">
+              <button
+                onClick={addNode}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                CREATE NODE
+              </button>
+              <button
+                onClick={handleSave}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                SAVE
+              </button>
+            </div>
+          </div>
+
+          {lights.length > 0 ? (
+            <div className="bg-gray-900 p-4 rounded-lg">
+              <Accordion
+                className="bg-gray-800 text-white rounded-lg"
+                defaultExpanded={true} // Expand by default, optional
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon className="text-white" />}
+                  aria-controls="lights-content"
+                  id="lights-header"
+                >
+                  <div className="flex items-center space-x-2">
+                    <LightbulbIcon className="text-yellow-400" />
+                    <h4 className="text-white">Lights</h4>
+                  </div>
+                </AccordionSummary>
+
+                <AccordionDetails>
+                  {lights.map((light, index) => (
+                    <div
+                      key={index}
+                      className="relative flex items-center justify-between mb-2 px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors"
+                      style={{
+                        height: "40px", // Sleek height
+                        border: "1px solid #3a3f47", // Border for sleek boxes
+                        boxShadow:
+                          index === lights.length - 1
+                            ? "0 0 10px #008cff"
+                            : "none", // Highlight effect for selected light
+                      }}
+                    >
+                      {/* Vertical connector line on the left */}
+                      {index !== lights.length - 1 && (
+                        <div className="absolute -left-5 top-1/2 h-full w-px bg-gray-500 transform -translate-y-1/2"></div>
+                      )}
+
+                      {/* Horizontal line connecting to the individual light box */}
+                      <div className="absolute -left-5 top-1/2 w-4 h-px bg-gray-500"></div>
+
+                      {/* Light name container with an icon */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-300 flex items-center">
+                          <span
+                            className="mr-2 flex items-center justify-center rounded-full bg-gray-600"
+                            style={{ width: "24px", height: "24px" }}
+                          >
+                            <span className="text-white">🗂️</span>{" "}
+                            {/* Replace icon as needed */}
+                          </span>
+                          {light.type}
+                        </span>
+                      </div>
+
+                      {/* Delete button on the right */}
+                      <button
+                        onClick={() => deleteLight(light)}
+                        className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded transition-colors"
+                        style={{ fontSize: "14px" }} // Adjusting font size for sleeker look
+                      >
+                        <DeleteIcon />
+                      </button>
+                    </div>
+                  ))}
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          ) : (
+            <p>No lights added yet.</p>
+          )}
+          <Button
+            onClick={addNode}
+            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            sx={{ marginRight: "7px" }}
+          >
+            CREATE NODE
+          </Button>
+          <Button
             onClick={handleSave}
             className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
             disabled={loading}
           >
-{loading ? <CircularProgress size={20} color="inherit" /> : "SAVE"}
-</Button>
-</div>
-</ReactFlowProvider>
+            {loading ? <CircularProgress size={20} color="inherit" /> : "SAVE"}
+          </Button>
+          <Menu
+            id="long-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={openProjectDialog}>Save Light Settings</MenuItem>
+            <MenuItem onClick={openLoadProjectDialog}>
+              Load Light Settings
+            </MenuItem>
+          </Menu>
+        </div>
+      </ReactFlowProvider>
 
       <Snackbar
         open={snackbarOpen}
@@ -323,6 +783,99 @@ CREATE NODE
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      <Dialog open={projectDialogOpen} onClose={closeProjectDialog}>
+        <DialogTitle>Enter Light Name</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Project Name"
+            type="text"
+            fullWidth
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeProjectDialog} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={saveLightSettings}
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={loadProjectDialogOpen}
+        onClose={closeLoadProjectDialog}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      >
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-lg">
+          <DialogTitle className="text-xl font-semibold text-gray-800 px-6 py-4 border-b border-gray-200">
+            Select a Project to Load
+          </DialogTitle>
+          <DialogContent className="px-6 py-4">
+            <List className="space-y-2">
+              {projects.map((project) => (
+                <ListItem
+                  component="button"
+                  onClick={() => loadProject(project.id)}
+                  key={project.id}
+                  className="px-4 py-2 rounded-lg hover:bg-blue-100 focus:bg-blue-100 focus:outline-none transition-colors"
+                >
+                  <ListItemText
+                    primary={
+                      <>
+                        <span className="font-medium">{project.name}</span>
+                        <span className="text-gray-500 text-sm">
+                          {" "}
+                          — {new Date(project.createdAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    }
+                    secondary={
+                      <div className="flex items-center">
+                        <ListItemIcon>
+                          <Checkbox
+                            checked={project.isDefault}
+                            onChange={() => handleCheckboxChange(project.id)}
+                            color="primary"
+                            inputProps={{
+                              "aria-label": "Default status checkbox",
+                            }}
+                          />
+                        </ListItemIcon>
+                        <span
+                          className={`text-sm ml-2 ${
+                            project.isDefault
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {project.isDefault ? "Default" : "Not Default"}
+                        </span>
+                      </div>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions className="px-6 py-4 border-t border-gray-200">
+            <Button
+              onClick={closeLoadProjectDialog}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-700 transition-colors"
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </div>
+      </Dialog>
 
       {confirmDelete && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

@@ -32,6 +32,14 @@ import {
   ListItemText,
 } from "@mui/material";
 import axios from "axios";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import SettingsIcon from "@mui/icons-material/Settings";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const mapNames = [
   "Diffuse",
@@ -94,8 +102,7 @@ const ControlPanel = () => {
   const [projectName, setProjectName] = useState("");
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [loadProjectDialogOpen, setLoadProjectDialogOpen] = useState(false);
-  const [projects, setProjects] = useState([]); // Store list of saved projects
-
+  const [projects, setProjects] = useState([]);
   const open = Boolean(anchorEl);
 
   const handleMenuClick = (event) => {
@@ -344,7 +351,6 @@ const ControlPanel = () => {
     }
   };
 
-  // Function to set a project as default
   const setDefaultProject = async (projectId) => {
     try {
       setLoading(true);
@@ -457,7 +463,10 @@ const ControlPanel = () => {
   return (
     <div className="flex h-full" onContextMenu={(e) => e.preventDefault()}>
       <ReactFlowProvider>
-        <div className="flex-auto bg-gray-800 relative">
+        <div
+          className="flex-auto relative"
+          style={{ backgroundColor: "#bbd4ce" }}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -474,7 +483,8 @@ const ControlPanel = () => {
             <Background />
           </ReactFlow>
         </div>
-        <div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50">
+
+        <div className="fixed bottom-0 right-0 w-64 p-4 bg-gray-900 text-white z-50 rounded-lg shadow-lg">
           <TextField
             label="Fabric Name"
             variant="filled"
@@ -499,10 +509,32 @@ const ControlPanel = () => {
               borderRadius: "4px",
             }}
           />
+
+          <div className="flex space-x-2 mb-4">
+            <Button
+              onClick={addNode}
+              className="p-2 bg-custom-teal text-white rounded hover:bg-custom-hoverbrand"
+              sx={{ marginRight: "7px" }}
+            >
+              CREATE NODE
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="p-2  bg-custom-teal text-white rounded hover:bg-custom-hoverbrand"
+              disabled={loading}
+            >
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "SAVE"
+              )}
+            </Button>
+          </div>
+
           <select
             onChange={(e) => setSelectedLight(e.target.value)}
             value={selectedLight}
-            style={{ marginBottom: "10px", width: "100%", color: "black" }}
+            className="w-full p-2 mb-4 text-black rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="Ambient Light">Ambient Light</option>
             <option value="Hemisphere Light">Hemisphere Light</option>
@@ -510,57 +542,88 @@ const ControlPanel = () => {
             <option value="Point Light">Point Light</option>
             <option value="Spot Light">Spot Light</option>
           </select>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Button
-              onClick={addLight}
-              className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-              sx={{ marginBottom: "10px", marginRight: "8px" }}
+
+          {/* <h4 className="flex items-center gap-2 text-lg font-semibold mb-4">
+            <LightbulbIcon className="text-yellow-400" />
+            Lights
+          </h4> */}
+          <Accordion className="bg-gray-800 text-white rounded-lg">
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon className="text-white" />}
+              aria-controls="lights-content"
+              id="lights-header"
             >
-              Add Light
-            </Button>
-            <Button
+              <div className="flex items-center space-x-2">
+                <LightbulbIcon className="text-yellow-400" />
+                <h4 className="text-white">Lights</h4>
+              </div>
+            </AccordionSummary>
+            <AccordionDetails>
+              {lights.length > 0 ? (
+                lights.map((light, index) => (
+                  <div
+                    key={index}
+                    className="relative flex items-center justify-between mb-2 px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors"
+                    style={{
+                      height: "40px",
+                      border: "1px solid #3a3f47",
+                      boxShadow:
+                        index === lights.length - 1
+                          ? "0 0 10px #008cff"
+                          : "none",
+                    }}
+                  >
+                    {index !== lights.length - 1 && (
+                      <div className="absolute -left-5 top-1/2 h-full w-px bg-gray-500 transform -translate-y-1/2"></div>
+                    )}
+
+                    <div className="absolute -left-5 top-1/2 w-4 h-px bg-gray-500"></div>
+
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-300 flex items-center">
+                        <span
+                          className="mr-2 flex items-center justify-center rounded-full bg-gray-600"
+                          style={{ width: "24px", height: "24px" }}
+                        >
+                          <span className="text-white">🗂️</span>
+                        </span>
+                        {light.type}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => deleteLight(light)}
+                      className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded transition-colors"
+                      style={{ fontSize: "14px" }}
+                    >
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No lights added yet.</p>
+              )}
+            </AccordionDetails>
+          </Accordion>
+          <div className="flex items-center space-x-2 mb-4">
+            <button
+              onClick={addLight}
+              className="bg-custom-teal hover:bg-custom-hoverbrand text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center space-x-2"
+            >
+              <AddIcon />
+              <span>Add</span>
+            </button>
+            <button
               aria-controls="long-menu"
               aria-haspopup="true"
               onClick={handleMenuClick}
-              sx={{ color: "white", marginBottom: "10px" }}
-              variant="contained"
+              className="bg-custom-teal hover:bg-custom-hoverbrand text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center space-x-2"
             >
-              Light Options
-            </Button>
+              <span>Light</span>
+              <SettingsIcon />
+            </button>
           </div>
-          {lights.length > 0 ? (
-            <div>
-              <h4>Lights:</h4>
-              {lights.map((light, index) => (
-                <div key={index} style={{ marginBottom: "10px" }}>
-                  <span>{light.type}</span>
-                  <Button
-                    onClick={() => deleteLight(light)}
-                    className="p-1 bg-red-500 text-white rounded hover:bg-red-700"
-                    sx={{ marginLeft: "10px" }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No lights added yet.</p>
-          )}
-          <Button
-            onClick={addNode}
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            sx={{ marginRight: "7px" }}
-          >
-            CREATE NODE
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            disabled={loading}
-          >
-            {loading ? <CircularProgress size={20} color="inherit" /> : "SAVE"}
-          </Button>
+
           <Menu
             id="long-menu"
             anchorEl={anchorEl}
@@ -594,7 +657,7 @@ const ControlPanel = () => {
         <DialogTitle>Enter Light Name</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
+            autoFocus00
             margin="dense"
             label="Project Name"
             type="text"
@@ -616,6 +679,7 @@ const ControlPanel = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={loadProjectDialogOpen}
         onClose={closeLoadProjectDialog}

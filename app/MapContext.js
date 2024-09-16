@@ -15,6 +15,11 @@ export const MapProvider = ({ children, initialMaterialParams }) => {
     flatShading: initialMaterialParams?.flatShading || false, // New parameter
     aoMapIntensity: initialMaterialParams?.aoMapIntensity || 0.0, // New parameter
     clearcoat: initialMaterialParams?.clearcoat || 0.0, // New parameter
+    sheen: initialMaterialParams?.sheen || 0.0,
+    normalScale: {
+      x: initialMaterialParams?.normalScaleX || 1.0, // Store normalScale as an object
+      y: initialMaterialParams?.normalScaleY || 1.0,
+    },
   });
 
   const updateConnectedMaps = (mapType, file) => {

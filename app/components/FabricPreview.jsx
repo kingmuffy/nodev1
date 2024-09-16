@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useContext, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -52,7 +53,6 @@ const FabricPreview = () => {
       setSnackbarMessage("Error saving light settings.");
     } finally {
       setLoading(false);
-      // handle snackbar logic
     }
   };
 
@@ -70,6 +70,7 @@ const FabricPreview = () => {
       flatShading: false,
       aoMapIntensity: 0,
       clearcoat: 0,
+      normalScale: new THREE.Vector2(1, 1),
     };
 
     const params = { ...defaultMaterialParams, ...materialParams };
@@ -78,7 +79,17 @@ const FabricPreview = () => {
       if (currentModel) {
         currentModel.traverse((child) => {
           if (child.isMesh) {
-            child.material[paramName] = value;
+            if (paramName === "normalScale" && child.material.normalMap) {
+              if (
+                !child.material.normalScale ||
+                !(child.material.normalScale instanceof THREE.Vector2)
+              ) {
+                child.material.normalScale = new THREE.Vector2(1, 1);
+              }
+              child.material.normalScale.set(value.x, value.y);
+            } else if (paramName !== "normalScale") {
+              child.material[paramName] = value;
+            }
             child.material.needsUpdate = true;
           }
         });
@@ -146,6 +157,29 @@ const FabricPreview = () => {
         updateModelAndContext("clearcoat", value);
       });
 
+    // Normal scale X and Y adjustment
+    gui
+      .add(params.normalScale, "x", 0, 3)
+      .step(0.01)
+      .name("normalScaleX")
+      .onChange((value) => {
+        updateModelAndContext("normalScale", {
+          x: value,
+          y: params.normalScale.y,
+        });
+      });
+
+    gui
+      .add(params.normalScale, "y", 0, 3)
+      .step(0.01)
+      .name("normalScaleY")
+      .onChange((value) => {
+        updateModelAndContext("normalScale", {
+          x: params.normalScale.x,
+          y: value,
+        });
+      });
+
     gui.domElement.addEventListener("wheel", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -196,7 +230,7 @@ const FabricPreview = () => {
               envMap: null,
               roughnessMap: null,
               displacementMap: null,
-              specularMap: null,
+              anisotropyMap: null,
               emissiveMap: null,
               alphaMap: null,
               aoMap: null,
@@ -233,8 +267,8 @@ const FabricPreview = () => {
                     case "Displacement":
                       materialConfig.displacementMap = texture;
                       break;
-                    case "Specular":
-                      materialConfig.specularMap = texture;
+                    case "anisotropyMap":
+                      materialConfig.anisotropyMap = texture;
                       break;
                     case "Emissive":
                       materialConfig.emissiveMap = texture;
@@ -257,7 +291,7 @@ const FabricPreview = () => {
 
                   child.material = new MeshPhysicalMaterial({
                     ...materialConfig,
-                    shadowSide: DoubleSide, // Ensure shadows are visible on both sides
+                    shadowSide: DoubleSide,
                   });
                   child.material.needsUpdate = true;
                 });
@@ -279,7 +313,7 @@ const FabricPreview = () => {
       <Canvas
         shadows
         camera={{ position: [0, 5, 10], fov: 50 }}
-        style={{ backgroundColor: "#808080" }}
+        style={{ backgroundColor: "#efefef" }}
       >
         <LightNew lights={lights} onUpdate={updateLight} />
         {currentModel && <primitive object={currentModel} />}
